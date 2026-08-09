@@ -78,9 +78,10 @@ Code correction: completed.
 
 Build verification: passed with `npm run build`.
 
-GitHub push: pending.
+GitHub push: completed to `main`.
 
-Vercel deployment verification: pending.
+Vercel deployment verification: blocked/pending. Public URL still served the old bundle after push and nested routes still returned 404, so Vercel did not auto-deploy this GitHub commit during verification.
 
 Figma correction: blocked pending Figma file key or active session.
+
 
