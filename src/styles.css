@@ -185,3 +185,113 @@ button.behaviour {
   background: rgba(255,255,255,0.1);
   color: var(--muted);
 }
+.shell.no-sidebar {
+  display: block;
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto minmax(260px, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px clamp(18px, 3vw, 34px);
+  background: rgba(8, 9, 20, 0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand.horizontal {
+  width: auto;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.search-space {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid rgba(137, 92, 255, 0.28);
+  background: rgba(255,255,255,0.045);
+  border-radius: 18px;
+}
+
+.search-space input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.search-space button,
+.top-nav button {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  border-radius: 13px;
+  padding: 9px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.top-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.top-nav button.active,
+.search-space button {
+  background: var(--purple);
+  border-color: transparent;
+  color: #fff;
+}
+
+.no-sidebar .stage {
+  padding: clamp(18px, 3vw, 34px);
+}
+
+.layer-tabs {
+  margin-top: 16px;
+}
+
+.behaviour,
+button.behaviour {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  justify-content: flex-start !important;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+button.behaviour:hover {
+  text-decoration: underline;
+}
+
+.behaviour-fresh-wallet { color: #dfff36 !important; }
+.behaviour-creator { color: #23d777 !important; }
+.behaviour-migration-specialist { color: #9c6cff !important; }
+.behaviour-scalper { color: #ff405d !important; }
+.behaviour-sniper { color: #18d9ff !important; }
+.behaviour-unknown { color: var(--muted) !important; }
+
+@media (max-width: 760px) {
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .top-nav,
+  .search-space {
+    width: 100%;
+  }
+}
