@@ -1,4 +1,4 @@
-﻿import type { Checkpoint, TokenBundle, WalletRecord } from "./types";
+import type { Checkpoint, TokenBundle, WalletRecord } from "./types";
 
 export const CHECKPOINTS: Checkpoint[] = ["BUY_10", "BUY_25", "BUY_50", "BUY_100"];
 
@@ -42,10 +42,10 @@ export const bundles: TokenBundle[] = [
       { rank: 4, wallet: "Rot8Wallet1111111111111111111111111111", first_buy_at: "2026-08-09T14:09:05.000Z", buy_sol: 0.31, current_status: "partial_exit", retained_pct: 38, later_action: "Rotated after migration", confidence: "demo_only" }
     ],
     participants: [
-      { wallet: "B7BuyerRetain111111111111111111111111", buys: 4, sells: 1, net_sol: 2.7, retained_pct: 73, behaviour: "conviction holder" },
-      { wallet: "A1AccumWallet111111111111111111111111", buys: 6, sells: 0, net_sol: 4.9, retained_pct: 100, behaviour: "early accumulator" },
-      { wallet: "FsFlipExit111111111111111111111111111", buys: 2, sells: 3, net_sol: -0.4, retained_pct: 0, behaviour: "fast flipper" },
-      { wallet: "Rot8Wallet1111111111111111111111111111", buys: 3, sells: 2, net_sol: 0.8, retained_pct: 38, behaviour: "rotation wallet" }
+      { wallet: "B7BuyerRetain111111111111111111111111", buys: 4, sells: 1, net_sol: 2.7, retained_pct: 73, behaviour: "Fresh Wallet" },
+      { wallet: "A1AccumWallet111111111111111111111111", buys: 6, sells: 0, net_sol: 4.9, retained_pct: 100, behaviour: "Migration Specialist" },
+      { wallet: "FsFlipExit111111111111111111111111111", buys: 2, sells: 3, net_sol: -0.4, retained_pct: 0, behaviour: "Scalper" },
+      { wallet: "Rot8Wallet1111111111111111111111111111", buys: 3, sells: 2, net_sol: 0.8, retained_pct: 38, behaviour: "Sniper" }
     ],
     holders: [
       { wallet: "A1AccumWallet111111111111111111111111", share_pct: 4.8, note: "accumulated", confidence: "demo_only" },
@@ -94,7 +94,7 @@ export const bundles: TokenBundle[] = [
       { rank: 1, wallet: "HatchBuyer111111111111111111111111111", first_buy_at: "2026-08-09T14:13:10.000Z", buy_sol: 0.47, current_status: "holding", retained_pct: 100, later_action: "No exit observed", confidence: "demo_only" }
     ],
     participants: [
-      { wallet: "HatchBuyer111111111111111111111111111", buys: 2, sells: 0, net_sol: 0.91, retained_pct: 100, behaviour: "early accumulator" }
+      { wallet: "HatchBuyer111111111111111111111111111", buys: 2, sells: 0, net_sol: 0.91, retained_pct: 100, behaviour: "Migration Specialist" }
     ],
     holders: [{ wallet: "HatchBuyer111111111111111111111111111", share_pct: 3.1, note: "holding", confidence: "demo_only" }],
     historical: [{ title: "Pre-migration breadth without migration", similarity: 0.51, checkpoint: "BUY_50", decision: "Avoid", outcome: "Often stayed noisy unless retention improved before migration.", caution: "BUY_100 evidence is missing." }],
@@ -146,12 +146,12 @@ export const wallets: WalletRecord[] = [
 ];
 
 export const walletStats: Record<string, { label: string; behaviour: string; winRate: number | null; trades: number; pnlUsd: number | null; roiPct: number | null; holdingPct: number | null; supplyPct: number | null; usdValue: number | null; age: string; soldPct: number | null; remainingPct: number | null; entryMc: number | null }> = {
-  A1AccumWallet111111111111111111111111: { label: "Early accumulator", behaviour: "accumulated", winRate: 0.61, trades: 47, pnlUsd: 1840, roiPct: 142, holdingPct: 100, supplyPct: 4.8, usdValue: 201, age: "38m", soldPct: 0, remainingPct: 100, entryMc: 1420 },
-  B7BuyerRetain111111111111111111111111: { label: "Conviction holder", behaviour: "holding", winRate: 0.58, trades: 39, pnlUsd: 960, roiPct: 84, holdingPct: 73, supplyPct: 2.9, usdValue: 121, age: "34m", soldPct: 27, remainingPct: 73, entryMc: 1760 },
-  FsFlipExit111111111111111111111111111: { label: "Fast flipper", behaviour: "full exit", winRate: 0.52, trades: 64, pnlUsd: 310, roiPct: 22, holdingPct: 0, supplyPct: 0, usdValue: 0, age: "29m", soldPct: 100, remainingPct: 0, entryMc: 2200 },
-  Rot8Wallet1111111111111111111111111111: { label: "Rotation wallet", behaviour: "partial exit", winRate: 0.49, trades: 58, pnlUsd: 420, roiPct: 37, holdingPct: 38, supplyPct: 1.5, usdValue: 63, age: "22m", soldPct: 62, remainingPct: 38, entryMc: 3710 },
-  HatchBuyer111111111111111111111111111: { label: "Early accumulator", behaviour: "holding", winRate: 0.57, trades: 18, pnlUsd: 240, roiPct: 48, holdingPct: 100, supplyPct: 3.1, usdValue: 60, age: "19m", soldPct: 0, remainingPct: 100, entryMc: 1340 },
-  SeedEarly11111111111111111111111111111: { label: "New launch wallet", behaviour: "holding", winRate: null, trades: 3, pnlUsd: null, roiPct: null, holdingPct: 100, supplyPct: 1.2, usdValue: null, age: "2m", soldPct: 0, remainingPct: 100, entryMc: null }
+  A1AccumWallet111111111111111111111111: { label: "Early accumulator", behaviour: "Migration Specialist", winRate: 0.61, trades: 47, pnlUsd: 1840, roiPct: 142, holdingPct: 100, supplyPct: 4.8, usdValue: 201, age: "38m", soldPct: 0, remainingPct: 100, entryMc: 1420 },
+  B7BuyerRetain111111111111111111111111: { label: "Conviction holder", behaviour: "Fresh Wallet", winRate: 0.58, trades: 39, pnlUsd: 960, roiPct: 84, holdingPct: 73, supplyPct: 2.9, usdValue: 121, age: "34m", soldPct: 27, remainingPct: 73, entryMc: 1760 },
+  FsFlipExit111111111111111111111111111: { label: "Fast flipper", behaviour: "Scalper", winRate: 0.52, trades: 64, pnlUsd: 310, roiPct: 22, holdingPct: 0, supplyPct: 0, usdValue: 0, age: "29m", soldPct: 100, remainingPct: 0, entryMc: 2200 },
+  Rot8Wallet1111111111111111111111111111: { label: "Rotation wallet", behaviour: "Sniper", winRate: 0.49, trades: 58, pnlUsd: 420, roiPct: 37, holdingPct: 38, supplyPct: 1.5, usdValue: 63, age: "22m", soldPct: 62, remainingPct: 38, entryMc: 3710 },
+  HatchBuyer111111111111111111111111111: { label: "Early accumulator", behaviour: "Fresh Wallet", winRate: 0.57, trades: 18, pnlUsd: 240, roiPct: 48, holdingPct: 100, supplyPct: 3.1, usdValue: 60, age: "19m", soldPct: 0, remainingPct: 100, entryMc: 1340 },
+  SeedEarly11111111111111111111111111111: { label: "New launch wallet", behaviour: "Creator", winRate: null, trades: 3, pnlUsd: null, roiPct: null, holdingPct: 100, supplyPct: 1.2, usdValue: null, age: "2m", soldPct: 0, remainingPct: 100, entryMc: null }
 };
 
 export const fmtMoney = (value: number | null | undefined, precision = 2) => {
