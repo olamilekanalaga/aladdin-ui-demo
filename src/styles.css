@@ -456,7 +456,7 @@ button.behaviour:hover {
   padding: 0;
   display: grid;
   place-items: center;
-  border-radius: 15px;
+  border-radius: 999px;
 }
 
 @media (max-width: 680px) {
@@ -475,4 +475,18 @@ button.behaviour:hover {
   .chat-input .primary {
     width: 100%;
   }
+}
+.brand-logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 0 24px rgba(143, 92, 255, 0.34);
+}
+
+.assistant-dot img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }

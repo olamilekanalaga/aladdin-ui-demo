@@ -1,21 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Clipboard, Download, Eye, LineChart, Lock, Search, Send, Target, Users, Wallet, Zap } from "lucide-react";
+import { Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Clipboard, Download, Eye, LineChart, Lock, Search, ArrowUp, Target, Users, Wallet, Zap } from "lucide-react";
 import { bundles, findBundle, fmtMoney, fmtPct, fmtPctWhole, searchDemo, short, walletInfo, wallets } from "./data";
 import type { Confidence, FirstBuyerRecord, ParticipantRecord, TokenBundle, TokenRecord, TradeRecord } from "./types";
+import aladdinLogo from "./assets/aladdin-logo.png";
 import "./styles.css";
 
 const IFA_SUGGESTIONS = [
   "Which live tokens have Fresh Wallets entering now?",
   "Show tokens where Migration Specialists are buying before migration.",
-  "Which tokens have Snipers buying but not selling yet?",
   "Are Scalpers exiting this token?",
   "Show the most profitable wallets on this token.",
-  "Which holders still control supply?",
-  "Compare Fresh Wallet vs Sniper behaviour on this token.",
-  "Is this token gaining real participation or just noise?",
-  "Export first 100 wallets as CSV.",
-  "Show tokens with rising buy pressure and low holder concentration."
+  "Export first 100 wallets as CSV."
 ];
 
 const route = () => window.location.pathname.replace(/\/$/, "") || "/";
@@ -48,7 +44,7 @@ function Table({ columns, rows }: { columns: string[]; rows: React.ReactNode[][]
 function Empty({ text }: { text: string }) { return <div className="empty"><AlertTriangle size={18} />{text}</div>; }
 
 function Landing() {
-  return <main className="landing"><section className="landing-card"><p className="eyebrow">Aladdin terminal</p><h1>Live Pump.fun intelligence with wallet behaviour.</h1><p className="lede">Aladdin watches tokens, trades, wallet behaviour, PnL, holdings and formations. Ask IFA waits until you ask a question.</p><div className="actions"><button className="primary" onClick={() => go("/login")}>Enter terminal</button><button className="ghost" onClick={() => go("/app/live")}>Open live view</button></div><div className="chips"><span>Live terminal</span><span>Wallet / CA search</span><span>Ask IFA on demand</span></div></section></main>;
+  return <main className="landing"><section className="landing-card"><p className="eyebrow">Aladdin terminal</p><h1>Live Pump.fun intelligence with wallet behaviour.</h1><p className="lede">Aladdin watches tokens, trades, wallet behaviour, PnL, holdings and formations. Ask IFÁ waits until you ask a question.</p><div className="actions"><button className="primary" onClick={() => go("/login")}>Enter terminal</button><button className="ghost" onClick={() => go("/app/live")}>Open live view</button></div><div className="chips"><span>Live terminal</span><span>Wallet / CA search</span><span>Ask IFÁ on demand</span></div></section></main>;
 }
 function Login() { const [value, setValue] = useState(""); return <main className="login"><form className="login-card" onSubmit={(e) => { e.preventDefault(); sessionStorage.setItem("aladdin-demo-auth", value || "ok"); go("/app/live"); }}><Lock size={34} /><h1>Aladdin access</h1><p>Open the terminal workspace.</p><input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter access phrase" /><button className="primary">Open Aladdin</button></form></main>; }
 
@@ -58,8 +54,8 @@ function Shell({ active, children }: { active: string; children: React.ReactNode
     const result = searchDemo(query)[0];
     if (result) go(result.route);
   };
-  const nav = [["live", "Live Terminal", "/app/live"], ["ifa", "Ask IFA", "/app/ask-ifa"]] as const;
-  return <div className="shell no-sidebar"><header className="topbar"><button className="brand horizontal" onClick={() => go("/app/live")}><b>A</b><span><strong>Aladdin</strong><small>Live terminal</small></span></button><div className="search-space"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }} placeholder="Search CA / wallet / token / txn" /><button onClick={runSearch}>Search</button></div><nav className="top-nav">{nav.map(([id, label, path]) => <button key={id} className={active === id ? "active" : ""} onClick={() => go(path)}>{label}</button>)}</nav></header><main className="stage">{children}</main></div>;
+  const nav = [["live", "Live Terminal", "/app/live"], ["ifa", "Ask IFÁ", "/app/ask-ifa"]] as const;
+  return <div className="shell no-sidebar"><header className="topbar"><button className="brand horizontal" onClick={() => go("/app/live")}><img className="brand-logo" src={aladdinLogo} alt="Aladdin" /><span><strong>Aladdin</strong><small>Live terminal</small></span></button><div className="search-space"><Search size={18} /><input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }} placeholder="Search CA / wallet / token / txn" /><button onClick={runSearch}>Search</button></div><nav className="top-nav">{nav.map(([id, label, path]) => <button key={id} className={active === id ? "active" : ""} onClick={() => go(path)}>{label}</button>)}</nav></header><main className="stage">{children}</main></div>;
 }
 function Header({ title, subtitle, icon: Icon }: { title: string; subtitle: string; icon: React.ComponentType<{ size?: number }> }) { return <header className="header"><div><p className="eyebrow"><Icon size={15} />{subtitle}</p><h1>{title}</h1></div></header>; }
 
@@ -107,7 +103,7 @@ function AskIfa({ embedded = false, bundle }: { embedded?: boolean; bundle?: Tok
   const rows = (bundle ? [bundle] : bundles).map((b) => [`$${b.token.symbol}`, b.token.behaviour_label, b.token.current_checkpoint, fmtMoney(b.token.market_cap_usd, 0), b.token.first_buyer_summary.holding]);
   const csv = ["symbol,behaviour,checkpoint,market_cap,first100_holding", ...rows.map((r) => r.map((x) => String(x).replaceAll(",", " ")).join(","))].join("\n");
   const download = () => { const blob = new Blob([csv], { type: "text/csv" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "aladdin_ifa_query.csv"; a.click(); URL.revokeObjectURL(url); };
-  const content = <section className="ifa-chat"><div className="chat-hero"><h1>Ask IFA</h1><p>Query Aladdin evidence across tokens, wallets, behaviours, holders, and formations.</p></div><div className="assistant-row"><div className="assistant-dot">A</div><div className="assistant-message"><strong>Ask about a token, wallet, behaviour pattern, holder group, PnL, or exportable table.</strong><small>Just now</small></div></div>{!hasAnswer && <div className="question-list">{IFA_SUGGESTIONS.map((q) => <button key={q} onClick={() => setQuery(q)}>{q}<span>Open</span></button>)}</div>}<div className="behaviour-strip"><span>Behaviour types:</span><BehaviourBadge value="Fresh Wallet" /><BehaviourBadge value="Creator" /><BehaviourBadge value="Migration Specialist" /><BehaviourBadge value="Scalper" /><BehaviourBadge value="Sniper" /></div>{hasAnswer && <div className="grid"><Panel title="IFA answer" icon={Brain}><p>Query interpreted as a Pump.fun behavioural-intelligence request. BUY checkpoints stay here, not in the terminal tables.</p><List items={["No execution instruction returned.", "Unknown fields stay unavailable.", "Use CSV export for research workflow."]} /></Panel><Panel title="Query result" icon={BarChart3}><Table columns={["Token", "Behaviour", "Checkpoint", "Market cap", "First 100 holding"]} rows={rows} /><button className="csv-button" onClick={download}><Download size={16} />Download CSV</button></Panel></div>}<div className="chat-input"><textarea value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ask IFA about tokens, wallets, behaviours, PnL, holders, or formations..." /><button className="primary" disabled={!query.trim()}><Send size={18} /></button></div></section>;
+  const content = <section className="ifa-chat"><div className="chat-hero"><h1>Ask IFÁ</h1><p>Query Aladdin evidence across tokens, wallets, behaviours, holders, and formations.</p></div><div className="assistant-row"><div className="assistant-dot"><img src={aladdinLogo} alt="Aladdin" /></div><div className="assistant-message"><strong>Ask about a token, wallet, behaviour pattern, holder group, PnL, or exportable table.</strong><small>Just now</small></div></div>{!hasAnswer && <div className="question-list">{IFA_SUGGESTIONS.map((q) => <button key={q} onClick={() => setQuery(q)}>{q}<span>Open</span></button>)}</div>}<div className="behaviour-strip"><span>Behaviour types:</span><BehaviourBadge value="Fresh Wallet" /><BehaviourBadge value="Creator" /><BehaviourBadge value="Migration Specialist" /><BehaviourBadge value="Scalper" /><BehaviourBadge value="Sniper" /></div>{hasAnswer && <div className="grid"><Panel title="IFA answer" icon={Brain}><p>Query interpreted as a Pump.fun behavioural-intelligence request. BUY checkpoints stay here, not in the terminal tables.</p><List items={["No execution instruction returned.", "Unknown fields stay unavailable.", "Use CSV export for research workflow."]} /></Panel><Panel title="Query result" icon={BarChart3}><Table columns={["Token", "Behaviour", "Checkpoint", "Market cap", "First 100 holding"]} rows={rows} /><button className="csv-button" onClick={download}><Download size={16} />Download CSV</button></Panel></div>}<div className="chat-input"><textarea value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ask IFÁ about tokens, wallets, behaviours, PnL, holders, or formations..." /><button className="primary" disabled={!query.trim()}><ArrowUp size={20} strokeWidth={3} /></button></div></section>;
   return embedded ? content : <Shell active="ifa">{content}</Shell>;
 }
 function WalletPage({ address }: { address?: string }) { const wallet = wallets.find((w) => w.wallet === address) ?? wallets[0]; const info = walletInfo(wallet.wallet); return <Shell active="live"><Header title="Wallet display" subtitle="Search result" icon={Wallet} /><div className="grid"><Panel title={short(wallet.wallet)} icon={Wallet}><Metric label="Behaviour" value={<BehaviourBadge value={info.behaviour} />} /><Metric label="Win rate" value={fmtPct(info.winRate)} /><Metric label="No. trades" value={info.trades} /><Metric label="Net profit" value={fmtMoney(info.pnlUsd, 0)} /><Metric label="Holdings" value={fmtPctWhole(info.holdingPct)} /></Panel><Panel title="Decision relevance" icon={Target}><p>Wallet display opens from search or table rows. It supports token investigation; it is not a separate main navigation mode.</p></Panel></div></Shell>; }
