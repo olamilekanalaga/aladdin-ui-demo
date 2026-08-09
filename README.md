@@ -1,6 +1,6 @@
-﻿# Aladdin UI Demo
+# Aladdin UI Demo
 
-Evidence-first frontend prototype for Aladdin / IFAGRITHM.
+Evidence-first frontend prototype for Aladdin with Ask IFA.
 
 This repository is a frontend-only Vite + React demo. It uses structured mock data that mirrors the future backend contract, but it does not connect to live Aladdin services.
 
@@ -22,7 +22,7 @@ The interface is designed to answer one trading-research question:
 - Launches: New Launches, Pre-Migration, Migrated, Discovery / Trending.
 - Token Intelligence: trade facts, first 100 buyer retention, participants, holders, live-state evidence, formation checkpoints and historical matches.
 - Wallet Intelligence: wallet temperament and wallet-token behaviour.
-- IFAGRITHM Search Terminal: semantic search over demo tokens, wallets and transactions.
+- Live Terminal: token stream, wallet/CA search, trench charts and labels.\n- Ask IFA: quiet query layer with table output and CSV export when the user asks.
 
 ## Formation model
 
@@ -55,7 +55,7 @@ Unknown backend values are rendered as `Unavailable`, not zero.
 - `/app/token/:mint/first-100`
 - `/app/token/:mint/formation-evidence`
 - `/app/wallet/:address`
-- `/app/terminal`
+- `/app/live\n- `/app/ask-ifa``
 
 `vercel.json` rewrites nested routes to `index.html` so browser refresh does not 404.
 

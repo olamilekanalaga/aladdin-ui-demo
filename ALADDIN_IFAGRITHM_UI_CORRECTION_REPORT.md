@@ -1,4 +1,4 @@
-﻿# Aladdin / IFAGRITHM UI Correction Report
+# Aladdin / IFAGRITHM UI Correction Report
 
 ## Executive conclusion
 
@@ -85,3 +85,12 @@ Vercel deployment verification: blocked/pending. Public URL still served the old
 Figma correction: blocked pending Figma file key or active session.
 
 
+
+## 2026-08-09 product alignment update
+
+- Live Terminal is now the primary workspace.
+- Wallet Intelligence was removed from main navigation; wallet display is reached through search.
+- IFAGRITHM UI language was replaced with Ask IFA product language.
+- Visible demo badges were removed from the frontend for screenshot use.
+- Purple was restored as the primary brand accent.
+- Standard bar chart display was replaced with a trench-style chart treatment.
