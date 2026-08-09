@@ -1,105 +1,198 @@
-import React,{useEffect,useMemo,useRef,useState}from'react';
-import{createRoot}from'react-dom/client';
-import{Bell,ChevronDown,Copy,ExternalLink,Search,Star,X}from'lucide-react';
-import{Behaviour,Token,TokenTab,behaviourColors,candles,money,participants,primaryWallet,tokens,topTokens,trades,walletTokenEvidence,wallets}from'./data';
-import'./styles.css';
+﻿import React, { useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Clipboard, Command, Compass, Eye, LineChart, Lock, MessageSquare, Search, ShieldAlert, Sparkles, Target, Users, Wallet } from "lucide-react";
+import { CHECKPOINTS, bundles, findBundle, fmtMoney, fmtPct, questions, searchDemo, short, wallets } from "./data";
+import type { Checkpoint, Confidence, FirstBuyerRecord, ParticipantRecord, TokenBundle, TokenRecord, TradeRecord } from "./types";
+import "./styles.css";
 
-const tabOrder:{label:string;slug:TokenTab}[]=[
-  {label:'Trades',slug:'trades'},{label:'Participants',slug:'participants'},{label:'Most Profitable',slug:'profitable'},
-  {label:'Largest Holders',slug:'largest-holders'},{label:'First 100',slug:'first-100'},{label:'Holders',slug:'holders'},
-  {label:'Live State',slug:'live'},{label:'Formation Evidence',slug:'formation'},{label:'Historical Match',slug:'historical'},
-];
-const protectedPath=(path:string)=>path.startsWith('/app/');
-const tokenPath=(token:Token,tab:TokenTab='trades')=>`/app/token/${token.contract}/${tab}`;
-const walletPath=(address:string)=>`/app/wallet/${address}`;
-const cohortPath=(token:Token,b:Behaviour)=>`/app/token/${token.contract}/behaviour/${encodeURIComponent(b.toLowerCase().replaceAll(' ','-'))}`;
-const contextualWalletPath=(token:Token,address:string)=>`/app/token/${token.contract}/wallet/${address}`;
-const isAuthed=()=>sessionStorage.getItem('aladdin-auth')==='true';
+const route = () => window.location.pathname.replace(/\/$/, "") || "/";
+const parts = () => route().split("/").filter(Boolean);
+const go = (path: string) => {
+  window.history.pushState({}, "", path);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
-function useRouter(){
-  const[path,setPath]=useState(location.pathname+location.search);
-  useEffect(()=>{const pop=()=>setPath(location.pathname+location.search);addEventListener('popstate',pop);return()=>removeEventListener('popstate',pop)},[]);
-  const go=(to:string,state:Record<string,unknown>={})=>{history.pushState(state,'',to);setPath(to)};
-  const replace=(to:string)=>{history.replaceState(history.state,'',to);setPath(to)};
-  return{path,pathname:path.split('?')[0],go,replace,back:()=>history.back()};
+function useRoute() {
+  const [path, setPath] = useState(route());
+  React.useEffect(() => {
+    const update = () => setPath(route());
+    window.addEventListener("popstate", update);
+    return () => window.removeEventListener("popstate", update);
+  }, []);
+  return path;
 }
 
-const slugBehaviour=(slug:string):Behaviour=>participants.find(p=>p.behaviour.toLowerCase().replaceAll(' ','-')===decodeURIComponent(slug))?.behaviour||'Migration Specialist';
-const findToken=(identifier:string)=>tokens.find(t=>t.contract===identifier||t.id===identifier)||tokens[0];
-const findWallet=(address:string)=>wallets.find(w=>w.address===address)||primaryWallet;
-const bclass=(b:Behaviour)=>`b-${b.toLowerCase().replaceAll(' ','-')}`;
-
-function Badge({behaviour,children}:{behaviour?:Behaviour;children:React.ReactNode}){return <span className={`badge ${behaviour?bclass(behaviour):''}`}>{children}</span>}
-function BehaviourBadge({behaviour,address}:{behaviour:Behaviour;address?:string}){const icon:Record<Behaviour,string>={'Migration Specialist':'↗','Scalper':'ϟ','Creator':'◆','Cluster Wallet':'⌘','Fresh Wallet':'✦','Unknown':'?','Bundle Specialist':'⬡','Insider':'◉'};return <span className={`badge ${bclass(behaviour)}`}><span className="mini-avatar">{(address||behaviour)[0]}</span><span className="behaviour-icon">{icon[behaviour]}</span>{behaviour}</span>}
-function Stat({label,value,tone}:{label:string;value:string;tone?:'positive'|'negative'|'warning'}){return <div className="stat"><small>{label}</small><b className={tone||''}>{value}</b></div>}
-function Table({headers,rows,className=''}:{headers:string[];rows:React.ReactNode[][];className?:string}){return <div className={`table-wrap ${className}`}><table><thead><tr>{headers.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}
-function Tabs({active,onChange}:{active:TokenTab;onChange:(v:TokenTab)=>void}){return <div className="tabs token-tabs" aria-label="Token intelligence layers">{tabOrder.map(t=><button key={t.slug} className={active===t.slug?'active':''} onClick={()=>onChange(t.slug)}>{t.label}</button>)}</div>}
-function Loading(){return <div className="skeletons" aria-label="Loading intelligence"><div/><div/><div/><div/></div>}
-
-function Landing({go}:{go:(p:string)=>void}){return <div className="entry"><div className="entry-card"><div className="entry-mark">◆</div><p className="eyebrow">ALADDIN INTELLIGENCE</p><h1>Investigate market behaviour before price confirms it.</h1><p>Professional, evidence-first on-chain intelligence for traders and researchers.</p><button className="primary" onClick={()=>go('/login')}>Enter Aladdin</button></div></div>}
-function Login({go}:{go:(p:string)=>void}){const params=new URLSearchParams(location.search),returnTo=params.get('returnTo')||'/app/launches/new';return <div className="entry"><form className="entry-card" onSubmit={e=>{e.preventDefault();sessionStorage.setItem('aladdin-auth','true');go(returnTo)}}><div className="entry-mark">◆</div><p className="eyebrow">MOCK AUTHENTICATION</p><h1>Open research workspace</h1><label>Email<input defaultValue="researcher@aladdin.app"/></label><label>Password<input type="password" defaultValue="prototype"/></label><button className="primary">Continue to Aladdin</button><small>No wallet, backend, or authentication provider is connected.</small></form></div>}
-
-function Shell({children,go,onSearch}:{children:React.ReactNode;go:(p:string,s?:Record<string,unknown>)=>void;onSearch:(q:string)=>void}){
-  const[q,setQ]=useState(''),[open,setOpen]=useState(false);const matches=useMemo(()=>tokens.filter(t=>(t.symbol+t.name+t.contract).toLowerCase().includes(q.toLowerCase())).slice(0,4),[q]);
-  const submit=(value=q)=>{if(!value.trim())return;setOpen(false);setQ(value);onSearch(value)};
-  return <div className="app"><header className="top"><button className="brand button-reset" onClick={()=>go('/app/launches/new')}><span>◆</span> ALADDIN INTELLIGENCE</button><form className="global-search" onSubmit={e=>{e.preventDefault();submit()}}><Search/><input aria-label="Global search" value={q} onFocus={()=>setOpen(true)} onChange={e=>{setQ(e.target.value);setOpen(true)}} placeholder="Search token CA, symbol, name, or wallet…"/>{q&&<button type="button" onClick={()=>setQ('')}><X/></button>}{open&&q&&<div className="suggestions"><small>DETECTED ENTITIES</small>{matches.map(t=><button type="button" key={t.id} onClick={()=>submit(t.symbol)}><i className="token-dot" style={{background:t.color}}>{t.symbol[0]}</i><b>{t.name}</b><em>Token</em><small>{t.symbol} · {t.contractSnippet}</small></button>)}{q.length>30&&<button type="button" onClick={()=>submit(q)}><i className="token-dot wallet-dot">W</i><b>{q.slice(0,11)}…</b><em>Wallet</em><small>Resolve wallet address</small></button>}</div>}</form><span className="live">● Live</span><button className="icon" aria-label="Notifications"><Bell/></button><button className="wallet">Solana <ChevronDown/></button><button className="profile-nav" onClick={()=>go('/app/profile')}><span>AR</span> Profile</button></header><aside><div className="workspace">Research Workspace <ChevronDown/></div><nav><button className={location.pathname.startsWith('/app/launches')?'active':''} onClick={()=>go('/app/launches/new')}>⌂ <span>Launches</span></button><button>! <span>Alerts</span></button><button>›_ <span>Terminal</span></button><button>⌁ <span>Behaviour Explorer</span></button></nav><footer><span>● Systems operational</span><small>Prototype · local fixtures</small></footer></aside><main>{children}</main></div>
+function DemoBadge() {
+  return <span className="demo-badge"><i />Demo data - Backend not connected</span>;
 }
 
-function PageTitle({title,subtitle,back}:{title:string;subtitle?:string;back?:()=>void}){return <div className="page-title"><div>{back&&<button className="text-action" onClick={back}>← Back</button>}<h1>{title}</h1>{subtitle&&<p>{subtitle}</p>}</div><span className="streaming">● Streaming</span></div>}
-
-function Launches({tab,go}:{tab:string;go:(p:string,s?:Record<string,unknown>)=>void}){
-  const[filter,setFilter]=useState(''),[page,setPage]=useState(1),restored=useRef(false);
-  useEffect(()=>{if(!restored.current){restored.current=true;scrollTo(0,Number(sessionStorage.getItem(`launch-scroll-${tab}`)||0))}return()=>sessionStorage.setItem(`launch-scroll-${tab}`,String(scrollY))},[tab]);
-  const items=tokens.filter(t=>tab==='migrated'?t.migrated:tab==='new'?!t.migrated:true).filter(t=>(t.name+t.symbol).toLowerCase().includes(filter.toLowerCase()));
-  const open=(t:Token)=>go(tokenPath(t),{fromLaunches:`/app/launches/${tab}`});
-  return <><PageTitle title="Launches" subtitle="Which market formations deserve investigation?"/><div className="toolbar"><div className="tabs">{[['new','New Pairs'],['migrated','Migrated'],['trending','Trending']].map(([s,l])=><button key={s} className={tab===s?'active':''} onClick={()=>go(`/app/launches/${s}`)}>{l}</button>)}</div><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Filter visible tokens"/><select><option>Newest first</option><option>Highest volume</option></select></div>{tab==='trending'&&<div className="prototype-note"><b>Prototype ranking</b><span>No hidden score. Values below are the factual contributing inputs.</span></div>}<div className="discovery-table"><div className="discovery-row discovery-header"><span>Token</span><span>{tab==='trending'?'Labelled wallets':'Wallet participation'}</span><span>Market cap</span><span>Liquidity</span><span>5m volume</span><span>Buys / sells</span><span>Net flow</span><span>Holder growth</span><span>Migration</span><span>Actions</span></div>{items.map(t=><div key={t.id} className="discovery-row" role="link" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter'||e.key===' ')open(t)}} onClick={()=>open(t)}><span className="discovery-token"><i className="token-logo" style={{background:t.color}}>{t.symbol.slice(0,2)}</i><b>{t.symbol}<small>{t.name} · {t.contractSnippet}</small></b></span><span className="wallet-participation"><b>{t.labelledWallets} labelled wallets</b><small>Inspect cohort evidence</small></span><strong>{money(t.marketCap)}</strong><strong>{money(t.liquidity)}</strong><strong>{money(t.volume5m)}</strong><span><b className="positive">{t.buys}</b> / <b className="negative">{t.sells}</b></span><strong className={t.netFlow>=0?'positive':'negative'}>{money(t.netFlow)}</strong><strong className="positive">+{t.holderGrowth}</strong><span className="migration-cell"><b className="warning">{t.migration}%</b><i><em style={{width:`${t.migration}%`}}/></i></span><span className="row-actions"><button title="Add to Watchlist" onClick={e=>{e.stopPropagation();alert(`${t.symbol} added to Watchlist`)}}><Star/></button><a href={t.tokenExplorerUrl} target="_blank" rel="noopener noreferrer" title="Open token explorer" onClick={e=>e.stopPropagation()}><ExternalLink/></a></span></div>)}</div><div className="pagination"><button onClick={()=>setPage(Math.max(1,page-1))}>Previous</button><span>Page {page}</span><button onClick={()=>setPage(page+1)}>Next</button></div></>
+function ConfidenceBadge({ value }: { value: Confidence }) {
+  const labels: Record<Confidence, string> = { verified: "Verified", partial: "Partial", demo_only: "Demo", unavailable: "Unavailable" };
+  return <span className={`confidence ${value}`}>{labels[value]}</span>;
 }
 
-function Chart({token,timeframe,onTimeframe}:{token:Token;timeframe:string;onTimeframe:(v:string)=>void}){const w=960,h=360,l=18,r=875,top=25,bottom=276,vbottom=334,min=64,max=104,y=(p:number)=>bottom-(p-min)/(max-min)*(bottom-top),step=(r-l)/candles.length,current=candles.at(-1)!.c;return <section className="panel chart exchange-chart"><header><div><b>{token.symbol} / SOL · Market Cap</b><small><span className="positive">O 78.12</span> H 79.08 L 77.64 <span className="negative">C 78.00 −0.67%</span></small></div><div className="chart-tools"><div className="ranges">{['1m','5m','15m','1H','4H','1D'].map(x=><button key={x} className={x===timeframe?'active':''} onClick={()=>onTimeframe(x)}>{x}</button>)}</div></div></header><svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${token.symbol} candlestick chart`}>{[68,76,84,92,100].map(p=><g key={p}><line x1={l} x2={r} y1={y(p)} y2={y(p)} className="grid"/><text x="890" y={y(p)+4} className="axis-label">{p.toFixed(2)}K</text></g>)}{candles.map((d,i)=>{const x=l+(i+.5)*step,yo=y(d.o),yc=y(d.c),up=d.c>=d.o,c=up?'candle-up':'candle-down',cw=Math.max(4,step*.54);return <g key={i}><line x1={x} x2={x} y1={y(d.h)} y2={y(d.l)} className={c}/><rect x={x-cw/2} y={Math.min(yo,yc)} width={cw} height={Math.max(2,Math.abs(yc-yo))} className={c}/><rect x={x-cw/2} y={vbottom-d.v*.62} width={cw} height={d.v*.62} className={up?'volume-up':'volume-down'}/></g>})}<line x1={l} x2={r} y1={y(current)} y2={y(current)} className="current-guide"/><text x="888" y={y(current)-5} className="current-label">{current.toFixed(2)}K</text></svg><footer>Market evidence · mock OHLC data <span>{timeframe} · UTC+1 · log · auto</span></footer></section>}
-
-function TokenWorkspace({token,tab,go}:{token:Token;tab:TokenTab;go:(p:string,s?:Record<string,unknown>)=>void}){
-  const key=`token-${token.id}`,[tf,setTf]=useState(sessionStorage.getItem(`${key}-tf`)||'15m');
-  useEffect(()=>sessionStorage.setItem(`${key}-tf`,tf),[tf,key]);
-  return <><PageTitle title={`${token.name.toUpperCase()} · ${token.symbol}`} subtitle="What is happening, what evidence explains it, and what should be investigated next?" back={()=>history.back()}/><section className="panel token-summary"><div className="token-head"><i className="token-logo" style={{background:token.color}}>{token.symbol[0]}</i><div><h2>{token.name}</h2><small>{token.symbol} · Solana · {token.contractSnippet} · launched {token.age} ago</small></div><Badge>Token</Badge><button className="secondary-action"><Star/> Add to Watchlist</button></div><div className="summary-stats"><Stat label="Market cap" value={money(token.marketCap)}/><Stat label="Liquidity" value={money(token.liquidity)}/><Stat label="24h volume" value={money(token.volume24h)}/><Stat label="Holders" value={token.holders.toLocaleString()}/><Stat label="Buys / sells" value={`${token.buys} / ${token.sells}`}/><Stat label="Migration" value={`${token.migration}%`} tone="warning"/></div></section><div className="detail-grid"><Chart token={token} timeframe={tf} onTimeframe={setTf}/><section className="panel evidence-stack"><h3>Observed wallet activity</h3>{participants.slice(0,3).map(p=><div className="driver" key={p.behaviour}><BehaviourBadge behaviour={p.behaviour}/><b>{p.wallets} wallets</b><span className="positive">+{p.net} net</span><small>{p.holding}% holding</small></div>)}<h3>Market evidence</h3><Stat label="Net flow · 5m" value={money(token.netFlow)} tone="positive"/><Stat label="Holder growth" value={`+${token.holderGrowth}`}/><Stat label="Liquidity" value={money(token.liquidity)}/></section></div><Tabs active={tab} onChange={v=>go(tokenPath(token,v))}/><TokenTabContent token={token} tab={tab} go={go}/></>
+function Pill({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "good" | "warn" | "bad" }) {
+  return <span className={`pill ${tone}`}>{children}</span>;
 }
 
-function TokenTabContent({token,tab,go}:{token:Token;tab:TokenTab;go:(p:string,s?:Record<string,unknown>)=>void}){
-  if(tab==='participants')return <Table headers={['Behaviour','Participants','Buys','Sells','Net activity','Holding']} rows={participants.map(p=>[<button className="behaviour-link" onClick={()=>go(cohortPath(token,p.behaviour))}><BehaviourBadge behaviour={p.behaviour}/></button>,`${p.wallets} wallets`,p.buys,p.sells,<span className="positive">+{p.net}</span>,`${p.holding}%`])}/>;
-  if(tab==='trades')return <Table headers={['Time','Behaviour','Side','Amount','Supply acquired','Holding','Wallet']} rows={trades.filter(t=>t.tokenId===token.id||token.id==='glippy').slice(0,10).map(t=>[t.time,<button className="behaviour-link" onClick={()=>go(contextualWalletPath(token,t.walletAddress),{returnTo:tokenPath(token,'trades')})}><BehaviourBadge behaviour={t.behaviour} address={t.walletAddress}/></button>,<span className={t.side==='Buy'?'positive':'negative'}>{t.side}</span>,`${t.sizeSol} SOL`,`${(t.sizeSol/8).toFixed(2)}%`,`${64+t.id.length}%`,<a href={t.walletExplorerUrl} target="_blank" rel="noopener noreferrer">{findWallet(t.walletAddress).snippet}<ExternalLink/></a>])}/>;
-  if(tab==='profitable')return <Table headers={['#','Wallet','Behaviour','Realised PnL','ROI']} rows={trades.slice(0,10).map((t,i)=>[i+1,findWallet(t.walletAddress).snippet,<BehaviourBadge behaviour={t.behaviour} address={t.walletAddress}/>,<span className="positive">+{money(Math.abs(t.pnl))}</span>,`${Math.abs(t.roi).toFixed(1)}%`])}/>;
-  if(['largest-holders','first-100','holders'].includes(tab))return <Table headers={['Wallet','Behaviour','Supply','Since']} rows={trades.slice(0,12).map((t,i)=>[findWallet(t.walletAddress).snippet,<BehaviourBadge behaviour={t.behaviour} address={t.walletAddress}/>,`${(7.8-i*.42).toFixed(2)}%`,`${i+1}d`])}/>;
-  if(tab==='live')return <div className="evidence-grid"><section className="panel info-panel"><h3>Live behaviour state</h3><Stat label="Buy volume" value={money(25410)} tone="positive"/><Stat label="Sell volume" value={money(12980)} tone="negative"/><Stat label="Unique buyers" value="32"/></section><section className="panel timeline"><h3>Behaviour timeline</h3><p>● Cluster formation identified <time>36s ago</time></p><p>● Net outflow reversal <time>2m ago</time></p><p>● Liquidity changed <time>4m ago</time></p></section></div>;
-  if(tab==='formation')return <div className="evidence-grid"><section className="panel info-panel"><h3>Early-life windows</h3><Stat label="1m market cap" value="$21.9K"/><Stat label="5m holders" value="572"/><Stat label="10m buy / sell" value="1.38x"/></section><section className="panel info-panel"><h3>Deployment and authority evidence</h3><Stat label="Deploy history" value="First known deploy"/><Stat label="Mint authority" value="Active" tone="negative"/><Stat label="Top 10 at launch" value="53.3%"/></section><section className="panel info-panel"><h3>Evidence quality</h3><Stat label="RPC coverage" value="100%"/><Stat label="Trade-feed gaps" value="2 short gaps"/><Stat label="Last sync" value="13s ago"/></section></div>;
-  return <section className="panel info-panel"><h3>Historical Match</h3><p className="muted">Supporting cohort evidence only. No token verdict is generated.</p><Table headers={['Token','Participant overlap','Market-cap path','Coverage']} rows={tokens.slice(1).map((t,i)=>[t.symbol,`${84-i*4}%`,`${6.7+i*1.2}x observed`,'Complete'])}/></section>
+function Avatar({ token, large = false }: { token: TokenRecord; large?: boolean }) {
+  return <div className={`avatar ${large ? "large" : ""}`}>{token.symbol.slice(0, 2)}</div>;
 }
 
-function BehaviourGroup({token,behaviour,go}:{token:Token;behaviour:Behaviour;go:(p:string,s?:Record<string,unknown>)=>void}){const group=participants.find(p=>p.behaviour===behaviour)!;return <><PageTitle title={`${behaviour} cohort`} subtitle={`Aggregated wallet activity on ${token.symbol}`} back={()=>go(tokenPath(token,'participants'))}/><div className="metrics cohort-metrics"><section className="panel metric"><Stat label="Wallets" value={String(group.wallets)}/></section><section className="panel metric"><Stat label="Buys" value={String(group.buys)} tone="positive"/></section><section className="panel metric"><Stat label="Sells" value={String(group.sells)} tone="negative"/></section><section className="panel metric"><Stat label="Net activity" value={`+${group.net}`} tone="positive"/></section><section className="panel metric"><Stat label="Holding" value={`${group.holding}%`}/></section></div><section className="panel cohort-flow"><h3>Group flow</h3><div className="flow-bars"><i style={{width:'72%'}}/><i style={{width:'38%'}}/><i style={{width:'84%'}}/></div></section><Table headers={['Wallet','Behaviour on token','Entry rank','Buy size','Remaining','Action']} rows={group.underlyingWallets.map((address,i)=>{const w=findWallet(address);return [w.snippet,<BehaviourBadge behaviour={behaviour} address={address}/>,`#${i+1}`,`${(28.56-i*4.2).toFixed(2)} SOL`,`${74-i*12}%`,<button className="text-action" onClick={()=>go(contextualWalletPath(token,address),{returnTo:tokenPath(token,'participants')})}>Inspect token evidence →</button>]})}/><section className="panel timeline"><h3>Group timeline</h3><p>● Entry breadth expanded <time>2m ago</time></p><p>● Net buying accelerated <time>4m ago</time></p><p>● Partial exits observed <time>8m ago</time></p></section></>}
-
-function WalletToken({token,address,go}:{token:Token;address:string;go:(p:string)=>void}){const wallet=findWallet(address),e={...walletTokenEvidence,walletAddress:address,behaviour:wallet.behaviours[0]};return <><PageTitle title="Wallet × Token Evidence" subtitle={`What did ${wallet.snippet} do on ${token.symbol}?`} back={()=>go(tokenPath(token,'participants'))}/><section className="panel wallet-token-head"><div className="avatar">{wallet.snippet[0]}</div><div><h2>{wallet.snippet}</h2><p><BehaviourBadge behaviour={e.behaviour} address={address}/></p></div><div className="context-token"><small>Selected token</small><b>{token.symbol}</b><span>{token.contractSnippet}</span></div></section><div className="metrics"><section className="panel metric"><Stat label="Entry rank" value={`#${e.entryRank}`}/></section><section className="panel metric"><Stat label="Entry time" value={e.entryTime}/></section><section className="panel metric"><Stat label="Buy size" value={`${e.buySizeSol} SOL`}/></section><section className="panel metric"><Stat label="Supply acquired" value={`${e.supplyAcquired}%`}/></section><section className="panel metric"><Stat label="Sold / remaining" value={`${e.sold}% / ${e.remaining}%`}/></section><section className="panel metric"><Stat label="Observed PnL" value={money(e.pnl)} tone="positive"/></section></div><div className="two-col"><section className="panel info-panel"><h3>Supporting behaviour evidence</h3><p>Entered within the early migration window.</p><p>Position remains materially open.</p><p>Buy size is above this wallet’s median entry.</p><small>Factual evidence only. No recommendation generated.</small></section><section className="panel timeline"><h3>Token-specific activity</h3>{e.timeline.map(x=><p key={x.label}>● {x.label} <time>{x.time} · {x.value}</time></p>)}</section></div></>}
-
-function GlobalWallet({address,go}:{address:string;go:(p:string,s?:Record<string,unknown>)=>void}){const w=findWallet(address);return <><PageTitle title="Wallet Intelligence" subtitle="Who is this wallet, how does it trade, and how reliable is its apparent edge?" back={()=>go('/app/launches/new')}/><section className="panel wallet-header"><div className="avatar">{w.snippet[0]}</div><div><h2>{w.snippet}</h2><small>{w.address}</small><p>{w.behaviours.map(b=><BehaviourBadge key={b} behaviour={b} address={w.address}/>)}</p></div><div className="wallet-facts"><Stat label="First seen" value={w.firstSeen}/><Stat label="Last active" value={w.lastActive}/></div></section><div className="metrics wallet-metrics"><section className="panel metric"><Stat label="7D realised PnL" value={money(w.pnl7d)} tone="positive"/></section><section className="panel metric"><Stat label="30D realised PnL" value={money(w.pnl30d)} tone="positive"/></section><section className="panel metric"><Stat label="Win rate" value={`${w.winRate}%`}/></section><section className="panel metric"><Stat label="ROI" value={`+${w.roi}%`} tone="positive"/></section><section className="panel metric"><Stat label="Trades" value={String(w.trades)}/></section><section className="panel metric"><Stat label="Tokens traded" value={String(w.tokensTraded)}/></section></div><div className="wallet-grid"><section className="panel info-panel"><h3>Behaviour identity</h3><div className="radar">◇</div><p className="muted">Migration timing · holding discipline · round-trip frequency</p></section><section className="panel info-panel"><h3>PnL history</h3><svg className="linechart" viewBox="0 0 400 150"><polyline points="0,130 30,120 60,124 90,105 120,115 150,80 180,95 215,38 245,59 280,40 320,43 360,20 400,25"/></svg></section><section className="panel info-panel"><h3>PnL concentration</h3><div className="donut"><b>+{money(w.pnl30d)}</b></div></section></div><div className="two-col"><Table headers={['Observed token','Behaviour','PnL','ROI','Action']} rows={topTokens.map(x=>{const t=tokens.find(a=>a.id===x.tokenId)!;return [t.symbol,<BehaviourBadge behaviour={x.behaviour} address={w.address}/>,<span className="positive">+{money(x.pnl)}</span>,`${x.roi}%`,<button className="text-action" onClick={()=>go(tokenPath(t),{fromWallet:walletPath(w.address)})}>Open Token →</button>]})}/><section className="panel info-panel"><h3>Relationships and evidence quality</h3><Stat label="Shared funding relationships" value="7 wallets"/><Stat label="Frequently trades with" value="24 wallets"/><Stat label="RPC coverage" value="100%"/><Stat label="Last sync" value="18s ago"/><small>Wallet history incomplete before first observed transaction.</small></section></div></>}
-
-function ResultState({kind,value,go}:{kind:'loading'|'none'|'error';value:string;go:(p:string)=>void}){if(kind==='loading')return <Loading/>;return <div className="empty"><div>{kind==='error'?'!':'⌕'}</div><h2>{kind==='error'?'Resolver unavailable':'No token or wallet found'}</h2><p>{value}</p><button className="primary" onClick={()=>go('/app/launches/new')}>Return to Launches</button></div>}
-
-function App(){
-  const router=useRouter(),[searchState,setSearchState]=useState<{kind:'loading'|'none'|'error';value:string}|null>(null);
-  useEffect(()=>{if(protectedPath(router.pathname)&&!isAuthed()){router.replace(`/login?returnTo=${encodeURIComponent(router.pathname)}`)}},[router.pathname]);
-  const search=(q:string)=>{const value=q.trim(),token=tokens.find(t=>[t.symbol,t.name,t.contract].some(x=>x.toLowerCase()===value.toLowerCase()));const wallet=wallets.find(w=>w.address===value);if(value.toLowerCase()==='error'){setSearchState({kind:'error',value});return}setSearchState({kind:'loading',value});setTimeout(()=>{setSearchState(null);if(token)router.go(tokenPath(token));else if(wallet||value===primaryWallet.address)router.go(walletPath(value));else setSearchState({kind:'none',value})},450)};
-  if(router.pathname==='/')return <Landing go={router.go}/>;
-  if(router.pathname==='/login')return <Login go={router.go}/>;
-  const parts=router.pathname.split('/').filter(Boolean);
-  let content:React.ReactNode;
-  if(searchState)content=<ResultState {...searchState} go={router.go}/>;
-  else if(parts[1]==='launches')content=<Launches tab={parts[2]||'new'} go={router.go}/>;
-  else if(parts[1]==='token'){
-    const token=findToken(parts[2]);
-    if(parts[3]==='wallet')content=<WalletToken token={token} address={parts[4]} go={router.go}/>;
-    else if(parts[3]==='behaviour')content=<BehaviourGroup token={token} behaviour={slugBehaviour(parts[4])} go={router.go}/>;
-    else content=<TokenWorkspace token={token} tab={(parts[3]||'trades') as TokenTab} go={router.go}/>;
-  }else if(parts[1]==='wallet')content=<GlobalWallet address={parts[2]} go={router.go}/>;
-  else if(parts[1]==='profile')content=<div className="empty"><div>AR</div><h2>User Profile</h2><p>Existing account-management prototype remains outside this milestone.</p></div>;
-  else content=<Launches tab="new" go={router.go}/>;
-  return <Shell go={router.go} onSearch={search}>{content}</Shell>
+function Metric({ label, value }: { label: string; value: React.ReactNode }) {
+  return <div className="metric"><span>{label}</span><strong>{value}</strong></div>;
 }
 
-createRoot(document.getElementById('root')!).render(<App/>);
+function Panel({ title, icon: Icon, children }: { title: string; icon: React.ComponentType<{ size?: number }>; children: React.ReactNode }) {
+  return <section className="panel"><h2><Icon size={18} />{title}</h2>{children}</section>;
+}
+
+function Table({ columns, rows }: { columns: string[]; rows: React.ReactNode[][] }) {
+  if (!rows.length) return <Empty text="No rows available in this demo fixture." />;
+  return <div className="table-wrap"><table><thead><tr>{columns.map((c) => <th key={c}>{c}</th>)}</tr></thead><tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={`${i}-${j}`}>{c}</td>)}</tr>)}</tbody></table></div>;
+}
+
+function Empty({ text }: { text: string }) {
+  return <div className="empty"><AlertTriangle size={18} />{text}</div>;
+}
+
+function Landing() {
+  return <main className="landing"><section className="landing-card"><DemoBadge /><p className="eyebrow">Aladdin / IFAGRITHM</p><h1>Evidence-first Solana behavioural intelligence.</h1><p className="lede">A frontend-only prototype for launch evidence, token formation, wallet behaviour, and IFAGRITHM search. It is not an execution terminal and it does not make token calls.</p><div className="actions"><button className="primary" onClick={() => go("/login")}>Enter terminal</button><button className="ghost" onClick={() => go("/app/launches/new")}>View demo</button></div><div className="chips"><span>BUY_10 to BUY_100</span><span>No bot logic</span><span>Evidence before opinion</span></div></section></main>;
+}
+
+function Login() {
+  const [value, setValue] = useState("");
+  return <main className="login"><form className="login-card" onSubmit={(e) => { e.preventDefault(); sessionStorage.setItem("aladdin-demo-auth", value || "demo"); go("/app/launches/new"); }}><DemoBadge /><Lock size={34} /><h1>Demo terminal access</h1><p>Use any passphrase. This is frontend-only demo access.</p><input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter demo passphrase" /><button className="primary">Open Aladdin</button></form></main>;
+}
+
+function Shell({ active, children }: { active: string; children: React.ReactNode }) {
+  const nav = [
+    ["launches", "Launches", Sparkles, "/app/launches/new"],
+    ["tokens", "Token Intelligence", LineChart, `/app/token/${bundles[0].token.token_mint}/overview`],
+    ["wallets", "Wallet Intelligence", Wallet, `/app/wallet/${wallets[0].wallet}`],
+    ["terminal", "IFAGRITHM Search", Command, "/app/terminal"]
+  ] as const;
+  return <div className="shell"><aside><button className="brand" onClick={() => go("/app/launches/new")}><b>A</b><span><strong>Aladdin</strong><small>Behaviour terminal</small></span></button><DemoBadge /><nav>{nav.map(([id, label, Icon, path]) => <button key={id} className={active === id ? "active" : ""} onClick={() => go(path)}><Icon size={18} />{label}</button>)}</nav><div className="side-note"><ShieldAlert size={18} /><p>No execution, no predictions, no live backend claim.</p></div></aside><main className="stage">{children}</main></div>;
+}
+
+function Header({ title, subtitle, icon: Icon }: { title: string; subtitle: string; icon: React.ComponentType<{ size?: number }> }) {
+  return <header className="header"><div><p className="eyebrow"><Icon size={15} />{subtitle}</p><h1>{title}</h1></div><DemoBadge /></header>;
+}
+
+function Launches({ tab }: { tab: string }) {
+  const filtered = bundles.filter((b) => tab === "new" ? b.token.lifecycle === "new_launch" : tab === "premigration" ? b.token.lifecycle === "pre_migration" : tab === "migrated" ? b.token.lifecycle === "migrated" : true);
+  const tabs = [["new", "New Launches"], ["premigration", "Pre-Migration"], ["migrated", "Migrated"], ["trending", "Discovery / Trending"]];
+  return <Shell active="launches"><Header title="Launch intelligence" subtitle="Evidence workspace" icon={Compass} /><div className="tabs">{tabs.map(([id, label]) => <button key={id} className={tab === id ? "active" : ""} onClick={() => go(`/app/launches/${id}`)}>{label}</button>)}</div><div className="grid">{filtered.map((b) => <TokenCard key={b.token.token_mint} token={b.token} />)}{!filtered.length && <Empty text="No demo tokens in this workspace." />}</div></Shell>;
+}
+
+function TokenCard({ token }: { token: TokenRecord }) {
+  const s = token.first_buyer_summary;
+  return <article className="card"><div className="token-head"><Avatar token={token} /><div><div className="token-title"><strong>${token.symbol}</strong><span>{token.name}</span></div><button className="copy" onClick={() => navigator.clipboard?.writeText(token.token_mint)}>{short(token.token_mint)} <Clipboard size={13} /></button></div><Pill tone={token.lifecycle === "migrated" ? "good" : token.lifecycle === "pre_migration" ? "warn" : "neutral"}>{token.lifecycle.replace("_", " ")}</Pill></div><div className="metrics compact"><Metric label="Market cap" value={fmtMoney(token.market_cap_usd, 0)} /><Metric label="Volume" value={fmtMoney(token.volume_24h_usd, 0)} /><Metric label="Market Index" value={token.market_index ?? "Unavailable"} /><Metric label="Participation" value={token.participation_score ?? "Unavailable"} /></div><p className="evidence"><b>First 100:</b> {s.holding} holding / {s.partial_exit} partial / {s.full_exit} full exit / {s.accumulated} accumulated / {s.unknown} unknown</p><p className="muted">{token.behaviour_label}</p><button className="card-link" onClick={() => go(`/app/token/${token.token_mint}/overview`)}>Investigate evidence <ArrowRight size={15} /></button></article>;
+}
+
+function TokenPage({ mint, tab }: { mint?: string; tab?: string }) {
+  const bundle = findBundle(mint);
+  const active = tab || "overview";
+  const tabs = ["overview", "trades", "participants", "first-100", "holders", "wallet-token", "live-state", "formation-evidence", "historical-match", "consultation", "profitable"];
+  return <Shell active="tokens"><header className="token-hero"><Avatar token={bundle.token} large /><div><p className="eyebrow">Token Intelligence / {bundle.token.lifecycle.replace("_", " ")}</p><h1>${bundle.token.symbol} {bundle.token.name}</h1><button className="copy" onClick={() => navigator.clipboard?.writeText(bundle.token.token_mint)}>{bundle.token.token_mint} <Clipboard size={14} /></button></div><div className="hero-pills"><ConfidenceBadge value={bundle.token.evidence_quality.confidence} /><Pill tone="warn">Backend not connected</Pill></div></header><div className="tabs scroll">{tabs.map((t) => <button key={t} className={active === t ? "active" : ""} onClick={() => go(`/app/token/${bundle.token.token_mint}/${t}`)}>{t.replace("-", " ")}</button>)}</div>{renderTokenTab(bundle, active)}</Shell>;
+}
+
+function renderTokenTab(bundle: TokenBundle, tab: string) {
+  if (tab === "trades") return <Trades rows={bundle.trades} />;
+  if (tab === "participants") return <Participants rows={bundle.participants} />;
+  if (tab === "first-100") return <First100 rows={bundle.first100} />;
+  if (tab === "holders") return <Holders bundle={bundle} />;
+  if (tab === "wallet-token") return <WalletToken bundle={bundle} />;
+  if (tab === "live-state") return <LiveState bundle={bundle} />;
+  if (tab === "formation-evidence") return <Formation bundle={bundle} />;
+  if (tab === "historical-match") return <Historical bundle={bundle} />;
+  if (tab === "consultation") return <Consultation bundle={bundle} />;
+  if (tab === "profitable") return <Profitable />;
+  return <Overview bundle={bundle} />;
+}
+
+function Overview({ bundle }: { bundle: TokenBundle }) {
+  return <div className="grid"><Panel title="Market evidence" icon={BarChart3}><div className="metrics"><Metric label="Price" value={fmtMoney(bundle.token.price_usd, 8)} /><Metric label="Market cap" value={fmtMoney(bundle.token.market_cap_usd, 0)} /><Metric label="FDV" value={fmtMoney(bundle.token.fdv_usd, 0)} /><Metric label="Liquidity" value={fmtMoney(bundle.token.liquidity_usd, 0)} /><Metric label="Volume 24h" value={fmtMoney(bundle.token.volume_24h_usd, 0)} /><Metric label="Market Index" value={bundle.token.market_index ?? "Unavailable"} /></div></Panel><Panel title="Checkpoint chart" icon={LineChart}><Chart bundle={bundle} /></Panel><Panel title="First-buyer retention" icon={Users}><Retention token={bundle.token} /></Panel><Panel title="Data quality" icon={AlertTriangle}><ConfidenceBadge value={bundle.token.evidence_quality.confidence} /><p>Source: {bundle.token.evidence_quality.source}</p><List items={bundle.token.evidence_quality.missing} /></Panel></div>;
+}
+
+function Trades({ rows }: { rows: TradeRecord[] }) {
+  return <Panel title="Canonical trade facts" icon={Activity}><Table columns={["Time", "Side", "Wallet", "SOL", "Price", "Checkpoint"]} rows={rows.map((t) => [new Date(t.timestamp).toLocaleTimeString(), <Pill tone={t.side === "buy" ? "good" : "bad"}>{t.side.toUpperCase()}</Pill>, <button className="text-link" onClick={() => go(`/app/wallet/${t.wallet}`)}>{short(t.wallet)}</button>, t.sol_amount.toFixed(2), fmtMoney(t.price_usd, 8), t.checkpoint])} /></Panel>;
+}
+
+function Participants({ rows }: { rows: ParticipantRecord[] }) {
+  return <Panel title="Participant wallets" icon={Users}><Table columns={["Wallet", "Buys", "Sells", "Net SOL", "Retained", "Behaviour"]} rows={rows.map((p) => [<button className="text-link" onClick={() => go(`/app/wallet/${p.wallet}`)}>{short(p.wallet)}</button>, p.buys, p.sells, p.net_sol.toFixed(2), `${p.retained_pct}%`, p.behaviour])} /></Panel>;
+}
+
+function First100({ rows }: { rows: FirstBuyerRecord[] }) {
+  return <Panel title="First 100 buyer retention" icon={Target}><p className="muted">First buyers are classified as holding, partial exit, full exit, accumulated, or unknown.</p><Table columns={["Rank", "Wallet", "First buy", "SOL", "Status", "Retained", "Later action"]} rows={rows.map((r) => [r.rank, <button className="text-link" onClick={() => go(`/app/wallet/${r.wallet}`)}>{short(r.wallet)}</button>, new Date(r.first_buy_at).toLocaleTimeString(), r.buy_sol.toFixed(2), r.current_status.replace("_", " "), r.retained_pct === null ? "Unknown" : `${r.retained_pct}%`, r.later_action])} /></Panel>;
+}
+
+function Holders({ bundle }: { bundle: TokenBundle }) {
+  return <Panel title="Holder evidence" icon={Eye}><Table columns={["Wallet", "Share", "Source", "Note"]} rows={bundle.holders.map((h) => [h.wallet.includes("Unavailable") || h.wallet.includes("Holder") ? h.wallet : short(h.wallet), h.share_pct === null ? "Unavailable" : `${h.share_pct}%`, <ConfidenceBadge value={h.confidence} />, h.note])} /></Panel>;
+}
+
+function WalletToken({ bundle }: { bundle: TokenBundle }) {
+  return <div className="grid">{bundle.participants.map((p) => <Panel key={p.wallet} title={short(p.wallet)} icon={Wallet}><Metric label="Behaviour" value={p.behaviour} /><Metric label="Action" value={`${p.buys} buys / ${p.sells} sells`} /><Metric label="Retained" value={`${p.retained_pct}%`} /><p className="muted">Supports hold, avoid and risk sizing decisions only when combined with token evidence.</p></Panel>)}</div>;
+}
+
+function LiveState({ bundle }: { bundle: TokenBundle }) {
+  return <Panel title="Simulated live state" icon={Activity}><p className="muted">This is how live state should look after backend connection. It is not a live feed.</p><div className="timeline"><div><b>Current checkpoint</b><span>{bundle.token.current_checkpoint}</span></div><div><b>Lifecycle</b><span>{bundle.token.lifecycle.replace("_", " ")}</span></div><div><b>Latest displayed evidence</b><span>{bundle.token.behaviour_label}</span></div></div></Panel>;
+}
+
+function Formation({ bundle }: { bundle: TokenBundle }) {
+  const [checkpoint, setCheckpoint] = useState<Checkpoint>(bundle.token.current_checkpoint);
+  const state = bundle.token.checkpoints.find((c) => c.checkpoint === checkpoint) ?? bundle.token.checkpoints[0];
+  return <div className="grid"><Panel title="Checkpoint selector" icon={Target}><div className="checkpoint-row">{CHECKPOINTS.map((c) => <button key={c} className={checkpoint === c ? "active" : ""} onClick={() => setCheckpoint(c)}>{c}</button>)}</div><p className="muted">Formation is event-based, not a fixed 1/5/10-minute boundary.</p></Panel><Panel title={`${state.checkpoint} evidence`} icon={Brain}><div className="metrics"><Metric label="Buys" value={state.buys} /><Metric label="Sells" value={state.sells} /><Metric label="Unique buyers" value={state.unique_buyers} /><Metric label="Buy pressure" value={fmtPct(state.buy_pressure)} /><Metric label="First-buyer retention" value={fmtPct(state.first_buyer_retention)} /><Metric label="Top 5 buyer share" value={fmtPct(state.top5_buyer_share)} /></div><p className="note">{state.note}</p></Panel></div>;
+}
+
+function Historical({ bundle }: { bundle: TokenBundle }) {
+  return <div className="grid">{bundle.historical.map((h) => <Panel key={h.title} title={h.title} icon={Compass}><Metric label="Similarity" value={fmtPct(h.similarity)} /><Metric label="Checkpoint" value={h.checkpoint} /><Metric label="Decision affected" value={h.decision} /><p>{h.outcome}</p><p className="note warn">{h.caution}</p></Panel>)}{!bundle.historical.length && <Empty text="No historical matches in this demo fixture." />}</div>;
+}
+
+function Consultation({ bundle }: { bundle: TokenBundle }) {
+  return <div className="grid">{bundle.consultation.map((c) => <Panel key={c.question} title={c.question} icon={MessageSquare}><p>{c.answer}</p><List items={c.evidence} /><Metric label="Trade decision impact" value={c.trade_change} /><ConfidenceBadge value={c.confidence} /></Panel>)}</div>;
+}
+
+function Profitable() {
+  return <Panel title="Profitable secondary research" icon={Target}><p className="note warn">Research drift detected if this page becomes a promise of profitable calls.</p><p>This page is intentionally secondary. It should only answer what trade decision changes because of the evidence.</p><List items={["Buy: only after evidence improves expectancy", "Sell: when retained cohort collapses", "Hold: when participation remains broad", "Avoid: when concentration dominates", "Position size: when confidence is partial"]} /></Panel>;
+}
+
+function WalletPage({ address }: { address?: string }) {
+  const wallet = wallets.find((w) => w.wallet === address) ?? wallets[0];
+  return <Shell active="wallets"><Header title="Wallet Intelligence" subtitle="Behaviour profile" icon={Wallet} /><div className="grid"><Panel title={short(wallet.wallet)} icon={Wallet}><Metric label="Label" value={wallet.label} /><Metric label="Temperament" value={wallet.temperament} /><Metric label="Observed tokens" value={wallet.observed_tokens} /><Metric label="Early entries" value={wallet.early_entries} /><Metric label="Median hold" value={`${wallet.median_hold_minutes} min`} /><ConfidenceBadge value={wallet.evidence_quality.confidence} /></Panel><Panel title="Decision relevance" icon={Target}><p>Wallet evidence is supporting research. It changes risk sizing, avoid and hold decisions only when joined with token formation.</p></Panel></div></Shell>;
+}
+
+function Terminal() {
+  const [query, setQuery] = useState("");
+  const results = useMemo(() => searchDemo(query), [query]);
+  return <Shell active="terminal"><Header title="IFAGRITHM Search Terminal" subtitle="Ask evidence questions" icon={Command} /><section className="terminal"><div className="search-box"><Search size={20} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search mint, token, wallet, transaction, or question..." /></div><div className="suggestions">{questions.map((q) => <button key={q} onClick={() => setQuery(q)}>{q}</button>)}</div><div className="results">{results.map((r) => <button key={`${r.type}-${r.subtitle}`} className="result" onClick={() => go(r.route)}><span>{r.type}</span><strong>{r.title}</strong><small>{r.subtitle}</small><ConfidenceBadge value={r.confidence} /></button>)}{query && !results.length && <Empty text="No demo result found. Backend semantic search is not connected." />}</div></section></Shell>;
+}
+
+function Chart({ bundle }: { bundle: TokenBundle }) {
+  const max = Math.max(...bundle.token.checkpoints.map((c) => c.market_cap_usd ?? 0), 1);
+  return <div className="chart">{bundle.token.checkpoints.map((c) => <div className="bar" key={c.checkpoint}><span>{fmtMoney(c.market_cap_usd, 0)}</span><i style={{ height: `${Math.max(7, ((c.market_cap_usd ?? 0) / max) * 100)}%` }} /><small>{c.checkpoint}</small></div>)}</div>;
+}
+
+function Retention({ token }: { token: TokenRecord }) {
+  return <div className="retention">{Object.entries(token.first_buyer_summary).map(([k, v]) => <div key={k}><span>{k.replace("_", " ")}</span><b>{v}</b><i style={{ width: `${Math.min(100, Number(v) * 2)}%` }} /></div>)}</div>;
+}
+
+function List({ items }: { items: string[] }) {
+  return items.length ? <ul>{items.map((item) => <li key={item}>{item}</li>)}</ul> : <p className="muted">No missing inputs reported.</p>;
+}
+
+function App() {
+  const current = useRoute();
+  const p = parts();
+  if (current === "/") return <Landing />;
+  if (current === "/login") return <Login />;
+  if (p[0] !== "app") return <Landing />;
+  if (p[1] === "launches") return <Launches tab={p[2] || "new"} />;
+  if (p[1] === "token") return <TokenPage mint={p[2]} tab={p[3] || "overview"} />;
+  if (p[1] === "wallet") return <WalletPage address={p[2]} />;
+  if (p[1] === "terminal") return <Terminal />;
+  return <Launches tab="new" />;
+}
+
+createRoot(document.getElementById("root")!).render(<App />);

@@ -1,56 +1,176 @@
-export type Behaviour = 'Migration Specialist'|'Scalper'|'Creator'|'Cluster Wallet'|'Fresh Wallet'|'Unknown'|'Bundle Specialist'|'Insider';
-export type TokenTab = 'trades'|'participants'|'profitable'|'largest-holders'|'first-100'|'holders'|'live'|'formation'|'historical';
+﻿import type { Checkpoint, TokenBundle, WalletRecord } from "./types";
 
-export type Token = {
-  id:string; symbol:string; name:string; contract:string; contractSnippet:string; marketCap:number; liquidity:number;
-  volume5m:number; volume24h:number; age:string; migration:number; buys:number; sells:number; holders:number;
-  holderGrowth:number; netFlow:number; labelledWallets:number; migrated:boolean; color:string; tokenExplorerUrl:string;
-};
-export type Wallet = {
-  address:string; snippet:string; avatarUrl?:string; behaviours:Behaviour[]; firstSeen:string; lastActive:string;
-  pnl7d:number; pnl30d:number; pnlAll:number; roi:number; winRate:number; trades:number; tokensTraded:number;
-  walletExplorerUrl:string;
-};
-export type Trade = {
-  id:string; tokenId:string; walletAddress:string; time:string; side:'Buy'|'Sell'; sizeSol:number; pnl:number; roi:number;
-  behaviour:Behaviour; signature:string; transactionExplorerUrl:string; walletExplorerUrl:string;
-};
-export type ParticipantCohort = {behaviour:Behaviour;wallets:number;buys:number;sells:number;net:number;holding:number;underlyingWallets:string[]};
-export type WalletTokenEvidence = {
-  tokenId:string; walletAddress:string; behaviour:Behaviour; entryRank:number; entryTime:string; buySizeUsd:number; buySizeSol:number;
-  supplyAcquired:number; sold:number; remaining:number; pnl:number; timeline:{label:string;time:string;value:string}[];
-};
+export const CHECKPOINTS: Checkpoint[] = ["BUY_10", "BUY_25", "BUY_50", "BUY_100"];
 
-const glippyContract='5NgDxD1en3YXvS9amAtgb15nc4oRfuGxomcAfu4wpump';
-export const tokens:Token[]=[
-  {id:'glippy',symbol:'GLIPPY',name:'Glippy',contract:glippyContract,contractSnippet:'5NgD…pump',marketCap:269871,liquidity:41588,volume5m:53700,volume24h:1240000,age:'12h 24m',migration:100,buys:12542,sells:11201,holders:2543,holderGrowth:142,netFlow:12430,labelledWallets:142,migrated:true,color:'#42c98d',tokenExplorerUrl:`https://solscan.io/token/${glippyContract}`},
-  {id:'aurel',symbol:'AUR',name:'Aurel',contract:'7xD3tNw3mX2Sgw8WfH6VgJqRjGmJe6R2R1g4Nqpump',contractSnippet:'7xD3…pump',marketCap:1840000,liquidity:187000,volume5m:112000,volume24h:3120000,age:'42m',migration:84,buys:642,sells:416,holders:1382,holderGrowth:97,netFlow:8900,labelledWallets:88,migrated:false,color:'#7c5cff',tokenExplorerUrl:'https://solscan.io/token/7xD3tNw3mX2Sgw8WfH6VgJqRjGmJe6R2R1g4Nqpump'},
-  {id:'nova',symbol:'NOVA',name:'Nova Signal',contract:'4Qm8aX9zY7vT3wP5sD2nK6jL1hG8fR4cB9mE7qpump',contractSnippet:'4Qm8…pump',marketCap:34900,liquidity:12100,volume5m:27600,volume24h:91300,age:'47s',migration:36,buys:75,sells:31,holders:188,holderGrowth:61,netFlow:4200,labelledWallets:31,migrated:false,color:'#69a7ff',tokenExplorerUrl:'https://solscan.io/token/4Qm8aX9zY7vT3wP5sD2nK6jL1hG8fR4cB9mE7qpump'},
-  {id:'kite',symbol:'KITE',name:'Kite Protocol',contract:'B1v6Qp9Ym3tL8sN2wH5xG7jF4rE6cD1kA9zM8pump',contractSnippet:'B1v6…pump',marketCap:15300,liquidity:6600,volume5m:8100,volume24h:22100,age:'1m',migration:12,buys:28,sells:19,holders:94,holderGrowth:29,netFlow:1300,labelledWallets:15,migrated:false,color:'#e9b949',tokenExplorerUrl:'https://solscan.io/token/B1v6Qp9Ym3tL8sN2wH5xG7jF4rE6cD1kA9zM8pump'},
-  {id:'orb',symbol:'ORB',name:'Orbital',contract:'F7nL8sQ2mP4vX6zR1tK9wG3hB5cD7jE8aY2N6pump',contractSnippet:'F7nL…pump',marketCap:41800,liquidity:14700,volume5m:38200,volume24h:136000,age:'2m',migration:49,buys:94,sells:40,holders:247,holderGrowth:74,netFlow:6100,labelledWallets:44,migrated:false,color:'#f59e0b',tokenExplorerUrl:'https://solscan.io/token/F7nL8sQ2mP4vX6zR1tK9wG3hB5cD7jE8aY2N6pump'},
+export const bundles: TokenBundle[] = [
+  {
+    token: {
+      token_mint: "3XHWBdnGLIPPYpUMp111111111111111111111111",
+      name: "Glippy Terminal",
+      symbol: "GLIPPY",
+      lifecycle: "migrated",
+      launch_time: "2026-08-09T13:53:20.000Z",
+      migration_time: "2026-08-09T14:22:41.000Z",
+      creator_wallet: "9aCrE8orGLP111111111111111111111111111",
+      current_checkpoint: "BUY_100",
+      price_usd: 0.00000418,
+      market_cap_usd: 4180,
+      fdv_usd: 4180,
+      liquidity_usd: 12640,
+      volume_24h_usd: 18420,
+      market_index: 72,
+      participation_score: 68,
+      behaviour_label: "Momentum with retained early cohort",
+      evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["live backend", "verified holder balances"] },
+      first_buyer_summary: { holding: 42, partial_exit: 18, full_exit: 21, accumulated: 9, unknown: 10 },
+      checkpoints: [
+        { checkpoint: "BUY_10", buys: 10, sells: 1, unique_buyers: 9, unique_sellers: 1, buy_pressure: 0.91, first_buyer_retention: 0.78, top5_buyer_share: 0.42, market_cap_usd: 1420, volume_usd: 780, note: "Healthy first response, but the sample is still tiny." },
+        { checkpoint: "BUY_25", buys: 25, sells: 6, unique_buyers: 22, unique_sellers: 4, buy_pressure: 0.81, first_buyer_retention: 0.68, top5_buyer_share: 0.36, market_cap_usd: 2460, volume_usd: 3210, note: "Early buyers remain present while concentration falls." },
+        { checkpoint: "BUY_50", buys: 50, sells: 18, unique_buyers: 43, unique_sellers: 14, buy_pressure: 0.74, first_buyer_retention: 0.57, top5_buyer_share: 0.31, market_cap_usd: 3710, volume_usd: 9120, note: "Momentum is broadening; sell pressure is not yet dominant." },
+        { checkpoint: "BUY_100", buys: 100, sells: 39, unique_buyers: 76, unique_sellers: 31, buy_pressure: 0.72, first_buyer_retention: 0.51, top5_buyer_share: 0.27, market_cap_usd: 4180, volume_usd: 18420, note: "Tradable momentum candidate; monitor sell acceleration." }
+      ]
+    },
+    trades: [
+      { signature: "5sG1ppyBuy100", token_mint: "3XHWBdnGLIPPYpUMp111111111111111111111111", timestamp: "2026-08-09T14:31:44.000Z", side: "buy", wallet: "B7BuyerRetain111111111111111111111111", sol_amount: 1.42, token_amount: 339712, price_usd: 0.00000418, market_cap_usd: 4180, checkpoint: "BUY_100" },
+      { signature: "2sG1ppySell099", token_mint: "3XHWBdnGLIPPYpUMp111111111111111111111111", timestamp: "2026-08-09T14:31:12.000Z", side: "sell", wallet: "FsFlipExit111111111111111111111111111", sol_amount: 0.64, token_amount: 159203, price_usd: 0.00000402, market_cap_usd: 4020, checkpoint: "BUY_100" },
+      { signature: "3sG1ppyBuy050", token_mint: "3XHWBdnGLIPPYpUMp111111111111111111111111", timestamp: "2026-08-09T14:12:33.000Z", side: "buy", wallet: "A1AccumWallet111111111111111111111111", sol_amount: 0.95, token_amount: 256064, price_usd: 0.00000371, market_cap_usd: 3710, checkpoint: "BUY_50" }
+    ],
+    first100: [
+      { rank: 1, wallet: "A1AccumWallet111111111111111111111111", first_buy_at: "2026-08-09T13:56:22.000Z", buy_sol: 0.81, current_status: "accumulated", retained_pct: 100, later_action: "Added at BUY_25 and BUY_50", confidence: "demo_only" },
+      { rank: 2, wallet: "B7BuyerRetain111111111111111111111111", first_buy_at: "2026-08-09T13:58:11.000Z", buy_sol: 0.64, current_status: "holding", retained_pct: 73, later_action: "Trimmed once after migration", confidence: "demo_only" },
+      { rank: 3, wallet: "FsFlipExit111111111111111111111111111", first_buy_at: "2026-08-09T14:01:47.000Z", buy_sol: 0.22, current_status: "full_exit", retained_pct: 0, later_action: "Exited before BUY_50", confidence: "demo_only" },
+      { rank: 4, wallet: "Rot8Wallet1111111111111111111111111111", first_buy_at: "2026-08-09T14:09:05.000Z", buy_sol: 0.31, current_status: "partial_exit", retained_pct: 38, later_action: "Rotated after migration", confidence: "demo_only" }
+    ],
+    participants: [
+      { wallet: "B7BuyerRetain111111111111111111111111", buys: 4, sells: 1, net_sol: 2.7, retained_pct: 73, behaviour: "conviction holder" },
+      { wallet: "A1AccumWallet111111111111111111111111", buys: 6, sells: 0, net_sol: 4.9, retained_pct: 100, behaviour: "early accumulator" },
+      { wallet: "FsFlipExit111111111111111111111111111", buys: 2, sells: 3, net_sol: -0.4, retained_pct: 0, behaviour: "fast flipper" }
+    ],
+    holders: [
+      { wallet: "A1AccumWallet111111111111111111111111", share_pct: 4.8, note: "Demo estimate from trade retention, not holder RPC.", confidence: "demo_only" },
+      { wallet: "Holder set unavailable", share_pct: null, note: "Real holder balances are not connected.", confidence: "unavailable" }
+    ],
+    historical: [
+      { title: "Retained early cohort with falling concentration", similarity: 0.74, checkpoint: "BUY_100", decision: "Hold", outcome: "Comparable examples often produced continuation when sell acceleration stayed controlled.", caution: "Demo similarity only; backend matching is not connected." }
+    ],
+    consultation: [
+      { question: "What trade does this change?", answer: "It does not issue a buy call. It supports watchlist or hold consideration because early-buyer retention stayed above 50% by BUY_100.", evidence: ["BUY_100 buy pressure 72%", "First-buyer retention 51%", "Top-five buyer share declined to 27%"], trade_change: "Hold / watchlist / risk sizing", confidence: "demo_only" },
+      { question: "What invalidates it?", answer: "A rapid rise in sells while unique buyers flatten would downgrade the formation.", evidence: ["Sell count 39", "Unique buyers 76", "Median holding evidence partial"], trade_change: "Avoid / reduce risk", confidence: "demo_only" }
+    ]
+  },
+  {
+    token: {
+      token_mint: "7PREBdnHATCHpUMp222222222222222222222222",
+      name: "Hatchling Index",
+      symbol: "HATCH",
+      lifecycle: "pre_migration",
+      launch_time: "2026-08-09T14:11:12.000Z",
+      migration_time: null,
+      creator_wallet: "Cr8Hatch22222222222222222222222222222",
+      current_checkpoint: "BUY_50",
+      price_usd: 0.00000192,
+      market_cap_usd: 1920,
+      fdv_usd: 1920,
+      liquidity_usd: null,
+      volume_24h_usd: 6420,
+      market_index: 61,
+      participation_score: 57,
+      behaviour_label: "Pre-migration breadth forming",
+      evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["migration event", "verified liquidity"] },
+      first_buyer_summary: { holding: 23, partial_exit: 11, full_exit: 8, accumulated: 4, unknown: 4 },
+      checkpoints: [
+        { checkpoint: "BUY_10", buys: 10, sells: 2, unique_buyers: 8, unique_sellers: 2, buy_pressure: 0.83, first_buyer_retention: 0.7, top5_buyer_share: 0.49, market_cap_usd: 860, volume_usd: 510, note: "Fast start, concentration still high." },
+        { checkpoint: "BUY_25", buys: 25, sells: 8, unique_buyers: 21, unique_sellers: 6, buy_pressure: 0.76, first_buyer_retention: 0.62, top5_buyer_share: 0.41, market_cap_usd: 1340, volume_usd: 2140, note: "Breadth improving, still pre-migration." },
+        { checkpoint: "BUY_50", buys: 50, sells: 18, unique_buyers: 41, unique_sellers: 15, buy_pressure: 0.74, first_buyer_retention: 0.54, top5_buyer_share: 0.34, market_cap_usd: 1920, volume_usd: 6420, note: "Worth tracking, not confirmed momentum yet." },
+        { checkpoint: "BUY_100", buys: 50, sells: 18, unique_buyers: 41, unique_sellers: 15, buy_pressure: 0.74, first_buyer_retention: 0.54, top5_buyer_share: 0.34, market_cap_usd: null, volume_usd: 6420, note: "BUY_100 not reached." }
+      ]
+    },
+    trades: [
+      { signature: "HatchBuy050", token_mint: "7PREBdnHATCHpUMp222222222222222222222222", timestamp: "2026-08-09T14:29:02.000Z", side: "buy", wallet: "HatchBuyer111111111111111111111111111", sol_amount: 0.44, token_amount: 229166, price_usd: 0.00000192, market_cap_usd: 1920, checkpoint: "BUY_50" }
+    ],
+    first100: [
+      { rank: 1, wallet: "HatchBuyer111111111111111111111111111", first_buy_at: "2026-08-09T14:13:10.000Z", buy_sol: 0.47, current_status: "holding", retained_pct: 100, later_action: "No exit observed", confidence: "demo_only" }
+    ],
+    participants: [
+      { wallet: "HatchBuyer111111111111111111111111111", buys: 2, sells: 0, net_sol: 0.91, retained_pct: 100, behaviour: "early accumulator" }
+    ],
+    holders: [{ wallet: "Holder data unavailable", share_pct: null, note: "Holder RPC is not connected.", confidence: "unavailable" }],
+    historical: [{ title: "Pre-migration breadth without migration", similarity: 0.51, checkpoint: "BUY_50", decision: "Avoid", outcome: "Often stayed noisy unless retention improved before migration.", caution: "BUY_100 evidence is missing." }],
+    consultation: [{ question: "Is HATCH tradable yet?", answer: "Evidence is incomplete. The safer decision is monitor, not enter, until migration or stronger retention is observed.", evidence: ["BUY_50 reached", "Migration missing", "Liquidity unavailable"], trade_change: "Avoid / wait", confidence: "demo_only" }]
+  },
+  {
+    token: {
+      token_mint: "9NEWBdnSEEDpUMp3333333333333333333333333",
+      name: "Seed Signal",
+      symbol: "SEED",
+      lifecycle: "new_launch",
+      launch_time: "2026-08-09T14:32:10.000Z",
+      migration_time: null,
+      creator_wallet: "SeedCreator333333333333333333333333333",
+      current_checkpoint: "BUY_10",
+      price_usd: null,
+      market_cap_usd: null,
+      fdv_usd: null,
+      liquidity_usd: null,
+      volume_24h_usd: 120,
+      market_index: null,
+      participation_score: 34,
+      behaviour_label: "Launch detected; insufficient trade evidence",
+      evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["BUY_10 complete evidence", "verified price", "supply"] },
+      first_buyer_summary: { holding: 5, partial_exit: 0, full_exit: 0, accumulated: 1, unknown: 1 },
+      checkpoints: [
+        { checkpoint: "BUY_10", buys: 7, sells: 0, unique_buyers: 6, unique_sellers: 0, buy_pressure: 1, first_buyer_retention: 0.86, top5_buyer_share: 0.71, market_cap_usd: null, volume_usd: 120, note: "Launch exists, but BUY_10 has not completed." },
+        { checkpoint: "BUY_25", buys: 7, sells: 0, unique_buyers: 6, unique_sellers: 0, buy_pressure: 1, first_buyer_retention: 0.86, top5_buyer_share: 0.71, market_cap_usd: null, volume_usd: 120, note: "Pending." },
+        { checkpoint: "BUY_50", buys: 7, sells: 0, unique_buyers: 6, unique_sellers: 0, buy_pressure: 1, first_buyer_retention: 0.86, top5_buyer_share: 0.71, market_cap_usd: null, volume_usd: 120, note: "Pending." },
+        { checkpoint: "BUY_100", buys: 7, sells: 0, unique_buyers: 6, unique_sellers: 0, buy_pressure: 1, first_buyer_retention: 0.86, top5_buyer_share: 0.71, market_cap_usd: null, volume_usd: 120, note: "Pending." }
+      ]
+    },
+    trades: [],
+    first100: [{ rank: 1, wallet: "SeedEarly11111111111111111111111111111", first_buy_at: "2026-08-09T14:33:02.000Z", buy_sol: 0.08, current_status: "holding", retained_pct: 100, later_action: "No later event", confidence: "demo_only" }],
+    participants: [],
+    holders: [{ wallet: "Unavailable", share_pct: null, note: "Launch card intentionally shows pending metrics.", confidence: "unavailable" }],
+    historical: [],
+    consultation: [{ question: "What trade does this change?", answer: "None yet. The token has launch evidence only, so the decision impact is avoid or observe.", evidence: ["No completed BUY_10", "Price unavailable", "Supply unavailable"], trade_change: "Avoid / watchlist", confidence: "demo_only" }]
+  }
 ];
 
-export const primaryWallet:Wallet={address:'CdoQKournsTERPHJwJowB7DrS2o4tvBywASHPuuumaow',snippet:'CdoQ…maow',behaviours:['Migration Specialist','Scalper'],firstSeen:'2025-12-14 10:21 UTC',lastActive:'1 min ago',pnl7d:54021,pnl30d:80785,pnlAll:214663,roi:186.7,winRate:47,trades:170,tokensTraded:63,walletExplorerUrl:'https://solscan.io/account/CdoQKournsTERPHJwJowB7DrS2o4tvBywASHPuuumaow'};
-const otherWallets:Wallet[]=[
-  {address:'9f8RzQx3fJ6vW2mNc7Pk1TgY4Hs8Ld5Ea2UbXK4n',snippet:'9f8R…XK4n',behaviours:['Scalper'],firstSeen:'2026-01-08',lastActive:'3m ago',pnl7d:18420,pnl30d:36780,pnlAll:88200,roi:72,winRate:41,trades:217,tokensTraded:49,walletExplorerUrl:'https://solscan.io/account/9f8RzQx3fJ6vW2mNc7Pk1TgY4Hs8Ld5Ea2UbXK4n'},
-  {address:'7BKqT4mX8vY2nP6sR1cD9wF3hG5jL7aE4uZM1Ea',snippet:'7BKq…M1Ea',behaviours:['Fresh Wallet'],firstSeen:'2026-06-18',lastActive:'5m ago',pnl7d:11300,pnl30d:15900,pnlAll:15900,roi:54,winRate:62,trades:46,tokensTraded:11,walletExplorerUrl:'https://solscan.io/account/7BKqT4mX8vY2nP6sR1cD9wF3hG5jL7aE4uZM1Ea'},
-];
-export const wallets=[primaryWallet,...otherWallets];
-
-export const participants:ParticipantCohort[]=[
-  {behaviour:'Migration Specialist',wallets:174,buys:546,sells:32,net:514,holding:95,underlyingWallets:wallets.map(w=>w.address)},
-  {behaviour:'Scalper',wallets:112,buys:415,sells:224,net:191,holding:54,underlyingWallets:[otherWallets[0].address,primaryWallet.address]},
-  {behaviour:'Creator',wallets:66,buys:68,sells:42,net:26,holding:99,underlyingWallets:[otherWallets[1].address]},
-  {behaviour:'Cluster Wallet',wallets:230,buys:387,sells:6,net:381,holding:6,underlyingWallets:[primaryWallet.address]},
-  {behaviour:'Fresh Wallet',wallets:15,buys:46,sells:37,net:9,holding:85,underlyingWallets:[otherWallets[1].address]},
-  {behaviour:'Unknown',wallets:131,buys:416,sells:150,net:266,holding:39,underlyingWallets:[otherWallets[0].address]},
+export const wallets: WalletRecord[] = [
+  { wallet: "A1AccumWallet111111111111111111111111", label: "Early accumulator cluster", temperament: "early accumulator", observed_tokens: 47, early_entries: 31, median_hold_minutes: 38, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
+  { wallet: "FsFlipExit111111111111111111111111111", label: "Fast exit wallet", temperament: "fast flipper", observed_tokens: 64, early_entries: 44, median_hold_minutes: 7, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } }
 ];
 
-export const trades:Trade[]=Array.from({length:18},(_,i)=>{const w=wallets[i%wallets.length],token=tokens[i%tokens.length],side:'Buy'|'Sell'=i%4===0?'Sell':'Buy';return{id:`trade-${i}`,tokenId:token.id,walletAddress:w.address,time:`${i+1}m ago`,side,sizeSol:Number((1.2+i*.37).toFixed(2)),pnl:(i%4===0?-1:1)*(320+i*87),roi:(i%4===0?-18:1)*(24+i*3.2),behaviour:w.behaviours[i%w.behaviours.length],signature:`5X7d${i}Qp3n8vY2kLm9a1b2`,transactionExplorerUrl:`https://solscan.io/tx/5X7d${i}Qp3n8vY2kLm9a1b2`,walletExplorerUrl:w.walletExplorerUrl}});
+export const questions = [
+  "What trade does this change?",
+  "Which buyers stayed after BUY_50?",
+  "What invalidates this formation?",
+  "Show retained early cohorts.",
+  "Find wallets that accumulated before migration."
+];
 
-export const walletTokenEvidence:WalletTokenEvidence={tokenId:'glippy',walletAddress:primaryWallet.address,behaviour:'Migration Specialist',entryRank:1,entryTime:'3m after launch',buySizeUsd:1400,buySizeSol:28.56,supplyAcquired:1.64,sold:26,remaining:74,pnl:31400,timeline:[{label:'Initial buy',time:'3m after launch',value:'28.56 SOL'},{label:'Added position',time:'11m after launch',value:'8.20 SOL'},{label:'Partial exit',time:'2h ago',value:'26% sold'},{label:'Position observed',time:'13s ago',value:'74% remaining'}]};
+export const fmtMoney = (value: number | null | undefined, precision = 2) => {
+  if (value === null || value === undefined || Number.isNaN(value)) return "Unavailable";
+  if (Math.abs(value) < 0.01 && value !== 0) return `$${value.toExponential(2)}`;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: precision }).format(value);
+};
 
-export const topTokens=[{tokenId:'glippy',pnl:80332,roi:1869,behaviour:'Migration Specialist' as Behaviour},{tokenId:'aurel',pnl:13604,roi:542,behaviour:'Scalper' as Behaviour},{tokenId:'nova',pnl:8797,roi:161,behaviour:'Fresh Wallet' as Behaviour}];
-export const behaviourColors:Record<Behaviour,string>={'Migration Specialist':'#E9B949','Scalper':'#F06A70','Creator':'#69A7FF','Cluster Wallet':'#50C8E8','Fresh Wallet':'#42C98D','Unknown':'#8E96A3','Bundle Specialist':'#A78BFA','Insider':'#F59E0B'};
-export const candles=Array.from({length:48},(_,i)=>{const base=72+Math.sin(i/3)*7+i*.28;const up=i%5!==1;return{o:base,c:base+(up?2.1:-3.4),h:base+3.8,l:base-3.7,v:18+(i*7)%42}});
-export const money=(v:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+export const fmtPct = (value: number | null | undefined) => value === null || value === undefined ? "Unavailable" : `${(value * 100).toFixed(0)}%`;
+export const short = (value: string, left = 6, right = 4) => value.length <= left + right + 3 ? value : `${value.slice(0, left)}...${value.slice(-right)}`;
+
+export function findBundle(mint?: string) {
+  return bundles.find((item) => item.token.token_mint === mint) ?? bundles[0];
+}
+
+export function searchDemo(query: string) {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const tokenResults = bundles
+    .filter(({ token }) => [token.name, token.symbol, token.token_mint].some((v) => v.toLowerCase().includes(q)))
+    .map(({ token }) => ({ type: "token", title: `$${token.symbol} ${token.name}`, subtitle: token.token_mint, route: `/app/token/${token.token_mint}/overview`, confidence: token.evidence_quality.confidence }));
+  const walletResults = wallets
+    .filter((w) => [w.wallet, w.label, w.temperament].some((v) => v.toLowerCase().includes(q)))
+    .map((w) => ({ type: "wallet", title: w.label, subtitle: w.wallet, route: `/app/wallet/${w.wallet}`, confidence: w.evidence_quality.confidence }));
+  const tradeResults = bundles.flatMap((b) => b.trades)
+    .filter((t) => t.signature.toLowerCase().includes(q) || t.wallet.toLowerCase().includes(q))
+    .map((t) => ({ type: "transaction", title: t.signature, subtitle: `${t.side.toUpperCase()} ${short(t.token_mint)}`, route: `/app/token/${t.token_mint}/trades`, confidence: "demo_only" as const }));
+  return [...tokenResults, ...walletResults, ...tradeResults].slice(0, 10);
+}
