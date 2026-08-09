@@ -20,7 +20,7 @@ export const bundles: TokenBundle[] = [
       volume_24h_usd: 18420,
       market_index: 72,
       participation_score: 68,
-      behaviour_label: "Momentum with retained early cohort",
+      behaviour_label: "Retained early cohort",
       evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["live backend", "verified holder balances"] },
       first_buyer_summary: { holding: 42, partial_exit: 18, full_exit: 21, accumulated: 9, unknown: 10 },
       checkpoints: [
@@ -44,11 +44,13 @@ export const bundles: TokenBundle[] = [
     participants: [
       { wallet: "B7BuyerRetain111111111111111111111111", buys: 4, sells: 1, net_sol: 2.7, retained_pct: 73, behaviour: "conviction holder" },
       { wallet: "A1AccumWallet111111111111111111111111", buys: 6, sells: 0, net_sol: 4.9, retained_pct: 100, behaviour: "early accumulator" },
-      { wallet: "FsFlipExit111111111111111111111111111", buys: 2, sells: 3, net_sol: -0.4, retained_pct: 0, behaviour: "fast flipper" }
+      { wallet: "FsFlipExit111111111111111111111111111", buys: 2, sells: 3, net_sol: -0.4, retained_pct: 0, behaviour: "fast flipper" },
+      { wallet: "Rot8Wallet1111111111111111111111111111", buys: 3, sells: 2, net_sol: 0.8, retained_pct: 38, behaviour: "rotation wallet" }
     ],
     holders: [
-      { wallet: "A1AccumWallet111111111111111111111111", share_pct: 4.8, note: "Demo estimate from trade retention, not holder RPC.", confidence: "demo_only" },
-      { wallet: "Holder set unavailable", share_pct: null, note: "Real holder balances are not connected.", confidence: "unavailable" }
+      { wallet: "A1AccumWallet111111111111111111111111", share_pct: 4.8, note: "accumulated", confidence: "demo_only" },
+      { wallet: "B7BuyerRetain111111111111111111111111", share_pct: 2.9, note: "holding", confidence: "demo_only" },
+      { wallet: "HolderSetUnavailable11111111111111111111", share_pct: null, note: "unavailable", confidence: "unavailable" }
     ],
     historical: [
       { title: "Retained early cohort with falling concentration", similarity: 0.74, checkpoint: "BUY_100", decision: "Hold", outcome: "Comparable examples often produced continuation when sell acceleration stayed controlled.", caution: "Demo similarity only; backend matching is not connected." }
@@ -94,7 +96,7 @@ export const bundles: TokenBundle[] = [
     participants: [
       { wallet: "HatchBuyer111111111111111111111111111", buys: 2, sells: 0, net_sol: 0.91, retained_pct: 100, behaviour: "early accumulator" }
     ],
-    holders: [{ wallet: "Holder data unavailable", share_pct: null, note: "Holder RPC is not connected.", confidence: "unavailable" }],
+    holders: [{ wallet: "HatchBuyer111111111111111111111111111", share_pct: 3.1, note: "holding", confidence: "demo_only" }],
     historical: [{ title: "Pre-migration breadth without migration", similarity: 0.51, checkpoint: "BUY_50", decision: "Avoid", outcome: "Often stayed noisy unless retention improved before migration.", caution: "BUY_100 evidence is missing." }],
     consultation: [{ question: "Is HATCH tradable yet?", answer: "Evidence is incomplete. The safer decision is monitor, not enter, until migration or stronger retention is observed.", evidence: ["BUY_50 reached", "Migration missing", "Liquidity unavailable"], trade_change: "Avoid / wait", confidence: "demo_only" }]
   },
@@ -128,49 +130,45 @@ export const bundles: TokenBundle[] = [
     trades: [],
     first100: [{ rank: 1, wallet: "SeedEarly11111111111111111111111111111", first_buy_at: "2026-08-09T14:33:02.000Z", buy_sol: 0.08, current_status: "holding", retained_pct: 100, later_action: "No later event", confidence: "demo_only" }],
     participants: [],
-    holders: [{ wallet: "Unavailable", share_pct: null, note: "Launch card intentionally shows pending metrics.", confidence: "unavailable" }],
+    holders: [{ wallet: "SeedEarly11111111111111111111111111111", share_pct: 1.2, note: "holding", confidence: "demo_only" }],
     historical: [],
     consultation: [{ question: "What trade does this change?", answer: "None yet. The token has launch evidence only, so the decision impact is avoid or observe.", evidence: ["No completed BUY_10", "Price unavailable", "Supply unavailable"], trade_change: "Avoid / watchlist", confidence: "demo_only" }]
   }
 ];
 
 export const wallets: WalletRecord[] = [
-  { wallet: "A1AccumWallet111111111111111111111111", label: "Early accumulator cluster", temperament: "early accumulator", observed_tokens: 47, early_entries: 31, median_hold_minutes: 38, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
-  { wallet: "FsFlipExit111111111111111111111111111", label: "Fast exit wallet", temperament: "fast flipper", observed_tokens: 64, early_entries: 44, median_hold_minutes: 7, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } }
+  { wallet: "A1AccumWallet111111111111111111111111", label: "Early accumulator", temperament: "early accumulator", observed_tokens: 47, early_entries: 31, median_hold_minutes: 38, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
+  { wallet: "B7BuyerRetain111111111111111111111111", label: "Conviction holder", temperament: "conviction holder", observed_tokens: 39, early_entries: 24, median_hold_minutes: 44, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
+  { wallet: "FsFlipExit111111111111111111111111111", label: "Fast flipper", temperament: "fast flipper", observed_tokens: 64, early_entries: 44, median_hold_minutes: 7, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
+  { wallet: "Rot8Wallet1111111111111111111111111111", label: "Rotation wallet", temperament: "rotation wallet", observed_tokens: 58, early_entries: 21, median_hold_minutes: 16, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
+  { wallet: "HatchBuyer111111111111111111111111111", label: "Early accumulator", temperament: "early accumulator", observed_tokens: 18, early_entries: 12, median_hold_minutes: 26, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["realized PnL"] } },
+  { wallet: "SeedEarly11111111111111111111111111111", label: "New launch wallet", temperament: "unknown", observed_tokens: 3, early_entries: 2, median_hold_minutes: 0, evidence_quality: { confidence: "demo_only", source: "frontend fixture", missing: ["trade history"] } }
 ];
 
-export const questions = [
-  "What trade does this change?",
-  "Which buyers stayed after BUY_50?",
-  "What invalidates this formation?",
-  "Show retained early cohorts.",
-  "Find wallets that accumulated before migration."
-];
+export const walletStats: Record<string, { label: string; behaviour: string; winRate: number | null; trades: number; pnlUsd: number | null; roiPct: number | null; holdingPct: number | null; supplyPct: number | null; usdValue: number | null; age: string; soldPct: number | null; remainingPct: number | null; entryMc: number | null }> = {
+  A1AccumWallet111111111111111111111111: { label: "Early accumulator", behaviour: "accumulated", winRate: 0.61, trades: 47, pnlUsd: 1840, roiPct: 142, holdingPct: 100, supplyPct: 4.8, usdValue: 201, age: "38m", soldPct: 0, remainingPct: 100, entryMc: 1420 },
+  B7BuyerRetain111111111111111111111111: { label: "Conviction holder", behaviour: "holding", winRate: 0.58, trades: 39, pnlUsd: 960, roiPct: 84, holdingPct: 73, supplyPct: 2.9, usdValue: 121, age: "34m", soldPct: 27, remainingPct: 73, entryMc: 1760 },
+  FsFlipExit111111111111111111111111111: { label: "Fast flipper", behaviour: "full exit", winRate: 0.52, trades: 64, pnlUsd: 310, roiPct: 22, holdingPct: 0, supplyPct: 0, usdValue: 0, age: "29m", soldPct: 100, remainingPct: 0, entryMc: 2200 },
+  Rot8Wallet1111111111111111111111111111: { label: "Rotation wallet", behaviour: "partial exit", winRate: 0.49, trades: 58, pnlUsd: 420, roiPct: 37, holdingPct: 38, supplyPct: 1.5, usdValue: 63, age: "22m", soldPct: 62, remainingPct: 38, entryMc: 3710 },
+  HatchBuyer111111111111111111111111111: { label: "Early accumulator", behaviour: "holding", winRate: 0.57, trades: 18, pnlUsd: 240, roiPct: 48, holdingPct: 100, supplyPct: 3.1, usdValue: 60, age: "19m", soldPct: 0, remainingPct: 100, entryMc: 1340 },
+  SeedEarly11111111111111111111111111111: { label: "New launch wallet", behaviour: "holding", winRate: null, trades: 3, pnlUsd: null, roiPct: null, holdingPct: 100, supplyPct: 1.2, usdValue: null, age: "2m", soldPct: 0, remainingPct: 100, entryMc: null }
+};
 
 export const fmtMoney = (value: number | null | undefined, precision = 2) => {
   if (value === null || value === undefined || Number.isNaN(value)) return "Unavailable";
   if (Math.abs(value) < 0.01 && value !== 0) return `$${value.toExponential(2)}`;
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: precision }).format(value);
 };
-
 export const fmtPct = (value: number | null | undefined) => value === null || value === undefined ? "Unavailable" : `${(value * 100).toFixed(0)}%`;
+export const fmtPctWhole = (value: number | null | undefined) => value === null || value === undefined ? "Unavailable" : `${value.toFixed(0)}%`;
 export const short = (value: string, left = 6, right = 4) => value.length <= left + right + 3 ? value : `${value.slice(0, left)}...${value.slice(-right)}`;
-
-export function findBundle(mint?: string) {
-  return bundles.find((item) => item.token.token_mint === mint) ?? bundles[0];
-}
-
+export function findBundle(mint?: string) { return bundles.find((item) => item.token.token_mint === mint) ?? bundles[0]; }
+export function walletInfo(wallet: string) { return walletStats[wallet] ?? { label: "Unknown wallet", behaviour: "unknown", winRate: null, trades: 0, pnlUsd: null, roiPct: null, holdingPct: null, supplyPct: null, usdValue: null, age: "Unavailable", soldPct: null, remainingPct: null, entryMc: null }; }
 export function searchDemo(query: string) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
-  const tokenResults = bundles
-    .filter(({ token }) => [token.name, token.symbol, token.token_mint].some((v) => v.toLowerCase().includes(q)))
-    .map(({ token }) => ({ type: "token", title: `$${token.symbol} ${token.name}`, subtitle: token.token_mint, route: `/app/token/${token.token_mint}/overview`, confidence: token.evidence_quality.confidence }));
-  const walletResults = wallets
-    .filter((w) => [w.wallet, w.label, w.temperament].some((v) => v.toLowerCase().includes(q)))
-    .map((w) => ({ type: "wallet", title: w.label, subtitle: w.wallet, route: `/app/wallet/${w.wallet}`, confidence: w.evidence_quality.confidence }));
-  const tradeResults = bundles.flatMap((b) => b.trades)
-    .filter((t) => t.signature.toLowerCase().includes(q) || t.wallet.toLowerCase().includes(q))
-    .map((t) => ({ type: "transaction", title: t.signature, subtitle: `${t.side.toUpperCase()} ${short(t.token_mint)}`, route: `/app/token/${t.token_mint}/trades`, confidence: "demo_only" as const }));
+  const tokenResults = bundles.filter(({ token }) => [token.name, token.symbol, token.token_mint].some((v) => v.toLowerCase().includes(q))).map(({ token }) => ({ type: "token", title: `$${token.symbol} ${token.name}`, subtitle: token.token_mint, route: `/app/token/${token.token_mint}/trades`, confidence: token.evidence_quality.confidence }));
+  const walletResults = wallets.filter((w) => [w.wallet, w.label, w.temperament].some((v) => v.toLowerCase().includes(q))).map((w) => ({ type: "wallet", title: w.label, subtitle: w.wallet, route: `/app/wallet/${w.wallet}`, confidence: w.evidence_quality.confidence }));
+  const tradeResults = bundles.flatMap((b) => b.trades).filter((t) => t.signature.toLowerCase().includes(q) || t.wallet.toLowerCase().includes(q)).map((t) => ({ type: "transaction", title: t.signature, subtitle: `${t.side.toUpperCase()} ${short(t.token_mint)}`, route: `/app/token/${t.token_mint}/trades`, confidence: "demo_only" as const }));
   return [...tokenResults, ...walletResults, ...tradeResults].slice(0, 10);
 }

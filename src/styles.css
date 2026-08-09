@@ -109,3 +109,30 @@ ul { margin: 12px 0 0; padding-left: 18px; color: var(--muted); }
 @media (max-width: 1060px) { .live-layout { grid-template-columns: 1fr; } .stream-panel { position: static; } }
 @media (max-width: 860px) { .shell { grid-template-columns: 1fr; } aside { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); } aside nav { grid-template-columns: repeat(2,1fr); } .header, .token-hero { flex-direction: column; align-items: flex-start; } .token-head { grid-template-columns: auto 1fr; } .token-head .pill { grid-column: 1 / -1; } .result, .query-box { grid-template-columns: 1fr; } }
 @media (max-width: 540px) { .stage, aside { padding: 16px; } aside nav, .metrics.compact { grid-template-columns: 1fr; } }
+
+.live-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.terminal-token {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.terminal-token .card,
+.terminal-token .panel {
+  min-width: 0;
+}
+
+.terminal-token .card {
+  height: 100%;
+}
+
+@media (max-width: 1100px) {
+  .terminal-token {
+    grid-template-columns: 1fr;
+  }
+}
