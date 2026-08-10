@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Clipboard, Download, Eye, LineChart, Lock, Search, ArrowUp, Target, Users, Wallet, Zap } from "lucide-react";
 import { bundles, findBundle, fmtMoney, fmtPct, fmtPctWhole, searchDemo, short, walletInfo, wallets } from "./data";
@@ -7,11 +7,10 @@ import aladdinLogo from "./assets/aladdin-logo.png";
 import "./styles.css";
 
 const IFA_SUGGESTIONS = [
-  "Which live tokens have Fresh Wallets entering now?",
-  "Show tokens where Migration Specialists are buying before migration.",
-  "Are Scalpers exiting this token?",
-  "Show the most profitable wallets on this token.",
-  "Export first 100 wallets as CSV."
+  "Show me the first 100 buyers still holding.",
+  "Which wallets bought before migration?",
+  "Find historical formations similar to this token.",
+  "Compare buyer activity before and after migration."
 ];
 
 const route = () => window.location.pathname.replace(/\/$/, "") || "/";
@@ -97,13 +96,257 @@ function Holders({ bundle }: { bundle: TokenBundle }) { return <Panel title="Hol
 function ChartMarket({ bundle }: { bundle: TokenBundle }) { return <div className="grid"><Panel title="Trench chart" icon={LineChart}><TrenchChart bundle={bundle} /></Panel><Panel title="Market" icon={BarChart3}><div className="metrics"><Metric label="Price" value={fmtMoney(bundle.token.price_usd, 8)} /><Metric label="Market cap" value={fmtMoney(bundle.token.market_cap_usd, 0)} /><Metric label="FDV" value={fmtMoney(bundle.token.fdv_usd, 0)} /><Metric label="Liquidity" value={fmtMoney(bundle.token.liquidity_usd, 0)} /><Metric label="Volume 24h" value={fmtMoney(bundle.token.volume_24h_usd, 0)} /></div></Panel></div>; }
 function Overview({ bundle }: { bundle: TokenBundle }) { return <div className="grid"><Panel title="Overview" icon={BarChart3}><div className="metrics"><Metric label="Token" value={`$${bundle.token.symbol}`} /><Metric label="Lifecycle" value={bundle.token.lifecycle.replace("_", " ")} /><Metric label="Behaviour" value={bundle.token.behaviour_label} /><Metric label="Participants" value={bundle.token.participation_score ?? "Unavailable"} /></div></Panel><Panel title="Data quality" icon={AlertTriangle}><ConfidenceBadge value={bundle.token.evidence_quality.confidence} /><p>Source: {bundle.token.evidence_quality.source}</p><List items={bundle.token.evidence_quality.missing} /></Panel></div>; }
 
+type IfaMetric = {
+  label: string;
+  value: string;
+  detail?: string;
+};
+
+type IfaEvidenceBlock =
+  | { kind: "metrics"; title: string; metadata?: string; items: IfaMetric[] }
+  | { kind: "table"; title: string; subtitle: string; columns: string[]; rows: React.ReactNode[][]; actions?: string[] }
+  | { kind: "chart"; title: string; subtitle: string; points: { label: string; value: number; detail: string }[]; actions?: string[] }
+  | { kind: "timeline"; title: string; events: { time: string; label: string; detail: string }[] };
+
+type IfaMessage = {
+  role: "user" | "ifa";
+  text: string;
+  timestamp?: string;
+  provenance?: string[];
+  blocks?: IfaEvidenceBlock[];
+};
+
+const WALLET_RESULTS_ROWS: React.ReactNode[][] = [
+  [<a className="text-link" href={solscanWallet("8xA92pMf7YQdrm14LdzQdK9nLXbz72pK3vMGRqfE9az") } target="_blank" rel="noreferrer">8xA...9az</a>, "#12", "4.2 SOL", "72%", "28%"],
+  [<a className="text-link" href={solscanWallet("3Df6Qe2SAqvBz5qTWVng4FCJTFm6cZ1rq9KoU6sH2Rkt") } target="_blank" rel="noreferrer">3Df...Rkt</a>, "#19", "7.8 SOL", "41%", "59%"],
+  [<a className="text-link" href={solscanWallet("Cw17Gk4QCLhGGVFgjhj7GNsuWAxtc6oE67bEJqm89wnP") } target="_blank" rel="noreferrer">Cw1...wnP</a>, "#24", "2.9 SOL", "0%", "100%"],
+  [<a className="text-link" href={solscanWallet("Hf4CpM7DqkAd7WoY5ntPnK24dXBCiTbe27xtBz1KuBfA") } target="_blank" rel="noreferrer">Hf4...BfA</a>, "#31", "5.1 SOL", "88%", "12%"]
+];
+
+const REFINED_WALLET_ROWS: React.ReactNode[][] = [
+  [<a className="text-link" href={solscanWallet("3Df6Qe2SAqvBz5qTWVng4FCJTFm6cZ1rq9KoU6sH2Rkt") } target="_blank" rel="noreferrer">3Df...Rkt</a>, "#19", "7.8 SOL", "41%", "59%"],
+  [<a className="text-link" href={solscanWallet("Cw17Gk4QCLhGGVFgjhj7GNsuWAxtc6oE67bEJqm89wnP") } target="_blank" rel="noreferrer">Cw1...wnP</a>, "#24", "2.9 SOL", "0%", "100%"],
+  [<a className="text-link" href={solscanWallet("9pVNQ1kmgA68Mq3HQhN6eknW2iJGTd9M9LLoV6zF1SxP") } target="_blank" rel="noreferrer">9pV...SxP</a>, "#38", "6.4 SOL", "54%", "46%"]
+];
+
+const DEMO_IFA_MESSAGES: IfaMessage[] = [
+  {
+    role: "user",
+    text: "Which wallets bought this token before migration and were still holding 10 minutes after migration?",
+    timestamp: "Investigation start"
+  },
+  {
+    role: "ifa",
+    text: "I found 47 wallets meeting those conditions. The cohort is mixed: most exited, but a small group retained meaningful supply after migration.",
+    timestamp: "Demo evidence",
+    provenance: ["Observation period: pre-migration to 10 minutes after migration", "Coverage: 47 matching wallets", "Freshness: mock state for frontend demonstration"],
+    blocks: [
+      {
+        kind: "metrics",
+        title: "Cohort summary",
+        metadata: "Mock values; backend will supply verified counts later.",
+        items: [
+          { label: "Fully exited", value: "31", detail: "Sold 95%+ of acquired supply" },
+          { label: "Partial position", value: "11", detail: "Still hold less than 50%" },
+          { label: "Retained 50%+", value: "5", detail: "Higher-conviction holders" }
+        ]
+      },
+      {
+        kind: "table",
+        title: "Wallet results",
+        subtitle: "47 wallets",
+        columns: ["Wallet", "Entry", "Bought", "Sold", "Remaining"],
+        rows: WALLET_RESULTS_ROWS,
+        actions: ["Chart", "Full Table", "Open in Terminal", "Export"]
+      },
+      {
+        kind: "chart",
+        title: "Retention distribution",
+        subtitle: "Mock split of retained supply after migration",
+        points: [
+          { label: "Exited", value: 66, detail: "31 wallets" },
+          { label: "Partial", value: 24, detail: "11 wallets" },
+          { label: "50%+", value: 10, detail: "5 wallets" }
+        ],
+        actions: ["Open in Terminal", "Export"]
+      }
+    ]
+  },
+  {
+    role: "user",
+    text: "Now only show wallets that have done this on 5+ tokens.",
+    timestamp: "Follow-up"
+  },
+  {
+    role: "ifa",
+    text: "That reduces the cohort from 47 to 8 wallets. These look more like repeated behaviour patterns than one-off participation.",
+    timestamp: "Refined cohort",
+    provenance: ["Context preserved from the previous question", "Filter added: matching pattern on 5+ tokens", "Result count: 8 wallets"],
+    blocks: [
+      {
+        kind: "metrics",
+        title: "Refined cohort",
+        metadata: "Same investigation, narrower wallet history filter.",
+        items: [
+          { label: "Remaining wallets", value: "8", detail: "Previously 47" },
+          { label: "Median repeats", value: "7", detail: "Tokens with same behaviour" },
+          { label: "High retention", value: "3", detail: "Held 50%+ after migration" }
+        ]
+      },
+      {
+        kind: "table",
+        title: "Repeated wallet pattern",
+        subtitle: "8 wallets",
+        columns: ["Wallet", "Entry", "Bought", "Sold", "Remaining"],
+        rows: REFINED_WALLET_ROWS,
+        actions: ["Full Table", "Open in Terminal", "Export"]
+      }
+    ]
+  }
+];
+
+function downloadIfaCsv() {
+  const csv = [
+    "wallet,entry,bought,sold,remaining",
+    "8xA...9az,#12,4.2 SOL,72%,28%",
+    "3Df...Rkt,#19,7.8 SOL,41%,59%",
+    "Cw1...wnP,#24,2.9 SOL,0%,100%"
+  ].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ask_ifa_wallet_results_demo.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function createMockIfaResponse(question: string): IfaMessage {
+  const lower = question.toLowerCase();
+  const tokenIntent = /[1-9A-HJ-NP-Za-km-z]{32,44}/.test(question) || lower.includes("token") || lower.includes("contract");
+  const walletIntent = lower.includes("wallet") || lower.includes("holder") || lower.includes("first 100");
+  const historicalIntent = lower.includes("historical") || lower.includes("formation") || lower.includes("compare");
+
+  if (historicalIntent) {
+    return {
+      role: "ifa",
+      text: "I can structure this as a historical formation search. This mock answer shows where matched cohorts, observation windows and descriptive outcomes will render once the backend supplies evidence.",
+      timestamp: "Mock response",
+      provenance: ["Historical sample: demo only", "No prediction returned", "Use Terminal for manual inspection"],
+      blocks: [
+        { kind: "metrics", title: "Historical comparison", metadata: "Demo values only.", items: [
+          { label: "Similar formations", value: "126", detail: "Matched by behaviour mix" },
+          { label: "Exceeded 5x", value: "17%", detail: "Descriptive outcome, not a forecast" },
+          { label: "Failed below entry", value: "42%", detail: "Risk context" }
+        ]},
+        { kind: "timeline", title: "Formation timeline", events: [
+          { time: "T+0", label: "Launch detected", detail: "Token entered observation set" },
+          { time: "T+4m", label: "Fresh Wallet surge", detail: "Behaviour concentration increased" },
+          { time: "T+18m", label: "Migration Specialist entries", detail: "Repeated-wallet cohort appeared" }
+        ]}
+      ]
+    };
+  }
+
+  if (walletIntent) {
+    return {
+      role: "ifa",
+      text: "I found a wallet cohort that can be reviewed as evidence. This prototype keeps the answer descriptive and leaves the trading decision to the user.",
+      timestamp: "Mock response",
+      provenance: ["Wallet evidence: demo only", "Coverage: 47 wallets", "Export available for manual research"],
+      blocks: [
+        { kind: "metrics", title: "Wallet cohort", metadata: "Mock values only.", items: [
+          { label: "Wallets", value: "47", detail: "Matched current filter" },
+          { label: "Repeated pattern", value: "8", detail: "Seen on 5+ tokens" },
+          { label: "Retained 50%+", value: "5", detail: "After migration" }
+        ]},
+        { kind: "table", title: "Wallet results", subtitle: "47 wallets", columns: ["Wallet", "Entry", "Bought", "Sold", "Remaining"], rows: WALLET_RESULTS_ROWS, actions: ["Full Table", "Open in Terminal", "Export"] }
+      ]
+    };
+  }
+
+  return {
+    role: "ifa",
+    text: tokenIntent ? "I treated this as a token intelligence query. The response can combine token facts, wallet cohorts, charts and terminal actions when live evidence is available." : "I can turn this into an Aladdin evidence query. This mock response demonstrates the response structure that the backend will later populate.",
+    timestamp: "Mock response",
+    provenance: ["Demo response", "Backend integration pending", "No buy/sell recommendation generated"],
+    blocks: [
+      { kind: "metrics", title: "Token evidence shell", metadata: "Placeholder architecture for future verified data.", items: [
+        { label: "Matched wallets", value: "47", detail: "Demo cohort" },
+        { label: "Known behaviours", value: "5", detail: "Fresh, Creator, Migration, Scalper, Sniper" },
+        { label: "Terminal handoff", value: "Ready", detail: "Open deeper view" }
+      ]},
+      { kind: "chart", title: "Evidence trend", subtitle: "Mock chart response block", points: [
+        { label: "Launch", value: 26, detail: "Baseline" },
+        { label: "Pre-mig", value: 58, detail: "Buyer activity" },
+        { label: "Migration", value: 74, detail: "Wallet retention" },
+        { label: "+10m", value: 46, detail: "Post-migration" }
+      ], actions: ["Open in Terminal", "Export"] }
+    ]
+  };
+}
+
+function PromptSuggestions({ onSelect }: { onSelect: (prompt: string) => void }) {
+  return <div className="ifa-suggestions">{IFA_SUGGESTIONS.map((prompt) => <button key={prompt} type="button" onClick={() => onSelect(prompt)}>{prompt}</button>)}</div>;
+}
+
+function IfaEmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
+  return <section className="ifa-empty"><img src={aladdinLogo} alt="Aladdin" /><p className="eyebrow">Conversational evidence</p><h2>Ask Aladdin about on-chain activity</h2><p>Investigate tokens, wallets, participants and historical patterns using natural language.</p><PromptSuggestions onSelect={onPrompt} /></section>;
+}
+
+function IfaMetricSummary({ block }: { block: Extract<IfaEvidenceBlock, { kind: "metrics" }> }) {
+  return <div className="ifa-evidence-block"><div className="ifa-block-head"><strong>{block.title}</strong>{block.metadata && <span>{block.metadata}</span>}</div><div className="ifa-metric-grid">{block.items.map((item) => <div className="ifa-metric" key={item.label}><b>{item.value}</b><span>{item.label}</span>{item.detail && <small>{item.detail}</small>}</div>)}</div></div>;
+}
+
+function IfaEvidenceActions({ actions = [], terminalPath }: { actions?: string[]; terminalPath: string }) {
+  if (!actions.length) return null;
+  return <div className="ifa-evidence-actions">{actions.map((action) => <button key={action} type="button" onClick={() => action === "Open in Terminal" ? go(terminalPath) : action === "Export" ? downloadIfaCsv() : undefined}>{action === "Export" && <Download size={14} />}{action}</button>)}</div>;
+}
+
+function IfaEvidenceTable({ block, terminalPath }: { block: Extract<IfaEvidenceBlock, { kind: "table" }>; terminalPath: string }) {
+  return <div className="ifa-evidence-block"><div className="ifa-block-head"><strong>{block.title}</strong><span>{block.subtitle}</span></div><Table columns={block.columns} rows={block.rows} /><IfaEvidenceActions actions={block.actions} terminalPath={terminalPath} /></div>;
+}
+
+function IfaChartBlock({ block, terminalPath }: { block: Extract<IfaEvidenceBlock, { kind: "chart" }>; terminalPath: string }) {
+  return <div className="ifa-evidence-block"><div className="ifa-block-head"><strong>{block.title}</strong><span>{block.subtitle}</span></div><div className="ifa-chart-bars">{block.points.map((point) => <div className="ifa-chart-item" key={point.label}><div><i style={{ height: `${Math.max(10, point.value)}%` }} /></div><b>{point.label}</b><span>{point.detail}</span></div>)}</div><IfaEvidenceActions actions={block.actions} terminalPath={terminalPath} /></div>;
+}
+
+function IfaTimelineBlock({ block }: { block: Extract<IfaEvidenceBlock, { kind: "timeline" }> }) {
+  return <div className="ifa-evidence-block"><div className="ifa-block-head"><strong>{block.title}</strong><span>Context timeline</span></div><div className="ifa-timeline">{block.events.map((event) => <div key={`${event.time}-${event.label}`}><time>{event.time}</time><b>{event.label}</b><span>{event.detail}</span></div>)}</div></div>;
+}
+
+function IfaEvidence({ block, terminalPath }: { block: IfaEvidenceBlock; terminalPath: string }) {
+  if (block.kind === "metrics") return <IfaMetricSummary block={block} />;
+  if (block.kind === "table") return <IfaEvidenceTable block={block} terminalPath={terminalPath} />;
+  if (block.kind === "chart") return <IfaChartBlock block={block} terminalPath={terminalPath} />;
+  return <IfaTimelineBlock block={block} />;
+}
+
+function ConversationMessage({ message, terminalPath }: { message: IfaMessage; terminalPath: string }) {
+  return <article className={`ifa-message ${message.role}`}><div className="ifa-message-label"><span>{message.role === "user" ? "USER" : "IFÁ"}</span>{message.timestamp && <small>{message.timestamp}</small>}</div><div className="ifa-message-body"><p>{message.text}</p>{message.provenance && <div className="ifa-provenance">{message.provenance.map((item) => <span key={item}>{item}</span>)}</div>}{message.blocks?.map((block, index) => <IfaEvidence key={`${block.kind}-${index}`} block={block} terminalPath={terminalPath} />)}</div></article>;
+}
+
+function ChatComposer({ value, onChange, onSubmit }: { value: string; onChange: (value: string) => void; onSubmit: () => void }) {
+  return <form className="ifa-composer" onSubmit={(event) => { event.preventDefault(); onSubmit(); }}><textarea value={value} onChange={(event) => onChange(event.target.value)} placeholder="Ask about a token, wallet, behaviour or historical pattern…" /><button className="primary" disabled={!value.trim()} aria-label="Send Ask IFÁ question"><ArrowUp size={21} strokeWidth={3} /></button></form>;
+}
+
 function AskIfa({ embedded = false, bundle }: { embedded?: boolean; bundle?: TokenBundle }) {
-  const [query, setQuery] = useState("");
-  const hasAnswer = query.trim().length > 0;
-  const rows = (bundle ? [bundle] : bundles).map((b) => [`$${b.token.symbol}`, b.token.behaviour_label, b.token.current_checkpoint, fmtMoney(b.token.market_cap_usd, 0), b.token.first_buyer_summary.holding]);
-  const csv = ["symbol,behaviour,checkpoint,market_cap,first100_holding", ...rows.map((r) => r.map((x) => String(x).replaceAll(",", " ")).join(","))].join("\n");
-  const download = () => { const blob = new Blob([csv], { type: "text/csv" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "aladdin_ifa_query.csv"; a.click(); URL.revokeObjectURL(url); };
-  const content = <section className="ifa-chat"><div className="chat-hero"><h1>Ask IFÁ</h1><p>Query Aladdin evidence across tokens, wallets, behaviours, holders, and formations.</p></div><div className="assistant-row"><div className="assistant-dot"><img src={aladdinLogo} alt="Aladdin" /></div><div className="assistant-message"><strong>Ask about a token, wallet, behaviour pattern, holder group, PnL, or exportable table.</strong><small>Just now</small></div></div>{!hasAnswer && <div className="question-list">{IFA_SUGGESTIONS.map((q) => <button key={q} onClick={() => setQuery(q)}>{q}<span>Open</span></button>)}</div>}<div className="behaviour-strip"><span>Behaviour types:</span><BehaviourBadge value="Fresh Wallet" /><BehaviourBadge value="Creator" /><BehaviourBadge value="Migration Specialist" /><BehaviourBadge value="Scalper" /><BehaviourBadge value="Sniper" /></div>{hasAnswer && <div className="grid"><Panel title="IFA answer" icon={Brain}><p>Query interpreted as a Pump.fun behavioural-intelligence request. BUY checkpoints stay here, not in the terminal tables.</p><List items={["No execution instruction returned.", "Unknown fields stay unavailable.", "Use CSV export for research workflow."]} /></Panel><Panel title="Query result" icon={BarChart3}><Table columns={["Token", "Behaviour", "Checkpoint", "Market cap", "First 100 holding"]} rows={rows} /><button className="csv-button" onClick={download}><Download size={16} />Download CSV</button></Panel></div>}<div className="chat-input"><textarea value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ask IFÁ about tokens, wallets, behaviours, PnL, holders, or formations..." /><button className="primary" disabled={!query.trim()}><ArrowUp size={20} strokeWidth={3} /></button></div></section>;
+  const terminalMint = bundle?.token.token_mint ?? bundles[0].token.token_mint;
+  const terminalPath = `/app/token/${terminalMint}/participants`;
+  const [messages, setMessages] = useState<IfaMessage[]>(DEMO_IFA_MESSAGES);
+  const [draft, setDraft] = useState("");
+
+  const startFromPrompt = (prompt: string) => {
+    setMessages([{ role: "user", text: prompt, timestamp: "New question" }, createMockIfaResponse(prompt)]);
+    setDraft("");
+  };
+  const submit = () => {
+    const question = draft.trim();
+    if (!question) return;
+    setMessages((current) => [...current, { role: "user", text: question, timestamp: "Follow-up" }, createMockIfaResponse(question)]);
+    setDraft("");
+  };
+  const content = <section className="ifa-workspace"><header className="ifa-page-header"><div><p className="eyebrow"><Brain size={15} />Conversational intelligence</p><h1>Ask IFÁ</h1><p>Consult Aladdin’s on-chain evidence</p></div><button type="button" className="ghost" onClick={() => { setMessages([]); setDraft(""); }}>New Session</button></header>{messages.length === 0 ? <IfaEmptyState onPrompt={startFromPrompt} /> : <div className="ifa-thread">{messages.map((message, index) => <ConversationMessage key={`${message.role}-${index}`} message={message} terminalPath={terminalPath} />)}</div>}<ChatComposer value={draft} onChange={setDraft} onSubmit={submit} /></section>;
   return embedded ? content : <Shell active="ifa">{content}</Shell>;
 }
 function WalletPage({ address }: { address?: string }) { const wallet = wallets.find((w) => w.wallet === address) ?? wallets[0]; const info = walletInfo(wallet.wallet); return <Shell active="live"><Header title="Wallet display" subtitle="Search result" icon={Wallet} /><div className="grid"><Panel title={short(wallet.wallet)} icon={Wallet}><Metric label="Behaviour" value={<BehaviourBadge value={info.behaviour} />} /><Metric label="Win rate" value={fmtPct(info.winRate)} /><Metric label="No. trades" value={info.trades} /><Metric label="Net profit" value={fmtMoney(info.pnlUsd, 0)} /><Metric label="Holdings" value={fmtPctWhole(info.holdingPct)} /></Panel><Panel title="Decision relevance" icon={Target}><p>Wallet display opens from search or table rows. It supports token investigation; it is not a separate main navigation mode.</p></Panel></div></Shell>; }
