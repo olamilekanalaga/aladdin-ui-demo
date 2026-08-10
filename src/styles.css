@@ -1904,3 +1904,86 @@ button.behaviour:hover {
     font-size: 44px;
   }
 }
+
+/* Theme modes and purple primary interaction colour */
+:root {
+  --accent: var(--purple);
+  --accent-2: var(--purple-2);
+}
+:root[data-theme="light"] {
+  --bg: #f8f5ff;
+  --panel: rgba(255,255,255,.9);
+  --panel-2: rgba(247,242,255,.92);
+  --text: #181126;
+  --muted: #6f657d;
+  --line: rgba(55,33,89,.16);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root[data-accent="purple"] {
+  --accent: var(--purple);
+  --accent-2: var(--purple-2);
+}
+:root[data-theme="light"] body {
+  background: radial-gradient(circle at 10% 0%, rgba(143,92,255,.18), transparent 34%), radial-gradient(circle at 90% 0%, rgba(47,216,255,.1), transparent 28%), var(--bg);
+  color: var(--text);
+}
+:root[data-theme="light"] .landing-card,
+:root[data-theme="light"] .login-card,
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .panel,
+:root[data-theme="light"] .stream-panel,
+:root[data-theme="light"] .public-product-preview,
+:root[data-theme="light"] .public-ifa-preview,
+:root[data-theme="light"] .two-panel > article,
+:root[data-theme="light"] .capability-grid article,
+:root[data-theme="light"] .everywhere-section > div,
+:root[data-theme="light"] .access-section,
+:root[data-theme="light"] .onboarding-card,
+:root[data-theme="light"] .settings-card,
+:root[data-theme="light"] .settings-nav,
+:root[data-theme="light"] .query-box,
+:root[data-theme="light"] .chat-composer,
+:root[data-theme="light"] .conversation-card {
+  background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(245,240,255,.9));
+  box-shadow: 0 22px 54px rgba(63,44,96,.14);
+}
+:root[data-theme="light"] .public-page,
+:root[data-theme="light"] .account-entry {
+  background: radial-gradient(circle at 15% 0%, rgba(143,92,255,.18), transparent 35%), radial-gradient(circle at 90% 10%, rgba(47,216,255,.1), transparent 30%), var(--bg);
+}
+.primary,
+.top-nav button.active,
+.tabs button.active,
+.settings-subnav button.active,
+.onboarding-options button.selected,
+.start-choice-grid button:hover,
+.auth-button:hover {
+  border-color: rgba(143,92,255,.72);
+}
+.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+.top-nav button.active,
+.tabs button.active,
+.settings-group-head[aria-expanded="true"],
+.settings-subnav button.active,
+.public-nav a:hover,
+.public-footer a:hover,
+.login-links button:hover {
+  color: var(--accent-2);
+}
+.theme-card.light span {
+  background: linear-gradient(135deg, #fff, #efe7ff);
+}
+.theme-card.dark span {
+  background: linear-gradient(135deg, #05040e, #211437);
+}
+.theme-card.system span {
+  background: linear-gradient(135deg, #05040e 0 50%, #f8f5ff 50% 100%);
+}
+.accent-choice.purple i {
+  background: linear-gradient(135deg, var(--purple), var(--purple-2));
+}

@@ -16,6 +16,24 @@ const IFA_SUGGESTIONS = [
 const route = () => window.location.pathname.replace(/\/$/, "") || "/";
 const parts = () => route().split("/").filter(Boolean);
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
+type ThemeMode = "dark" | "light" | "system";
+const ALADDIN_THEME_KEY = "aladdin-theme-mode";
+const ALADDIN_DENSITY_KEY = "aladdin-density-mode";
+const readThemeMode = (): ThemeMode => {
+  if (typeof window === "undefined") return "dark";
+  const stored = localStorage.getItem(ALADDIN_THEME_KEY);
+  return stored === "light" || stored === "system" || stored === "dark" ? stored : "dark";
+};
+const resolveThemeMode = (mode: ThemeMode) => mode === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : mode === "system" ? "dark" : mode;
+const applyThemePreferences = (mode = readThemeMode()) => {
+  if (typeof document === "undefined") return;
+  const resolved = resolveThemeMode(mode);
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.dataset.themeMode = mode;
+  document.documentElement.dataset.accent = "purple";
+  document.documentElement.style.colorScheme = resolved;
+};
+applyThemePreferences();
 const solscanWallet = (wallet: string) => `https://solscan.io/account/${wallet}`;
 const solscanTx = (signature: string) => `https://solscan.io/tx/${signature}`;
 
@@ -514,11 +532,20 @@ function AccountSecuritySettings() {
   return <div className="settings-stack"><SettingsPageTitle eyebrow="Account" title="Account & Security" copy="Manage sign-in methods, your single connected wallet and account sessions." /><SettingsCard title="Sign-in methods"><SettingsRows rows={[["Google", "ol••••••@gmail.com", <StatusDot text="Connected" />]]} /></SettingsCard><SettingsCard title="Connected wallet"><div className="settings-callout"><b>7xKX...91pQ</b><StatusDot text="Connected" /><p>Your connected wallet represents your Aladdin account for supported wallet-authenticated features.</p><p>Only one wallet can be connected at a time.</p><button className="ghost" type="button">Disconnect</button></div><div className="settings-note"><b>Connected wallet is not investigated wallet.</b><span>You can investigate unlimited external wallets in Search, Terminal or Ask IFÁ without connecting them to your account.</span></div></SettingsCard><SettingsCard title="Active sessions"><SettingsRows rows={[["iPhone · Safari", "Current", <StatusDot text="Active" />], ["Windows · Chrome", "2 hours ago", <button className="settings-subtle-button" type="button">Review</button>]]} /><button className="ghost" type="button">Sign out other sessions</button></SettingsCard><SettingsCard title="Danger zone"><button className="danger-button" type="button">Delete Aladdin Account</button></SettingsCard></div>;
 }
 function AppearanceSettings() {
-  const [theme, setTheme] = useState("aladdin-dark");
-  const [accent, setAccent] = useState("purple");
-  const [density, setDensity] = useState("compact");
+  const [theme, setTheme] = useState<ThemeMode>(() => readThemeMode());
+  const [density, setDensity] = useState(() => typeof window === "undefined" ? "compact" : localStorage.getItem(ALADDIN_DENSITY_KEY) || "compact");
   const [reduceMotion, setReduceMotion] = useState(false);
-  return <div className="settings-stack"><SettingsPageTitle eyebrow="Personalisation" title="Appearance" copy="Control Aladdin’s interface style without changing evidence semantics." /><SettingsCard title="Theme"><div className="theme-grid">{[{ id: "aladdin-dark", label: "Aladdin Dark" }, { id: "midnight", label: "Midnight" }, { id: "obsidian", label: "Obsidian" }, { id: "system", label: "System" }].map((item) => <button key={item.id} type="button" className={`theme-card theme-${item.id} ${theme === item.id ? "selected" : ""}`} onClick={() => setTheme(item.id)}><span><i /><i /><i /></span><b>{item.label}</b>{theme === item.id && <small>Selected</small>}</button>)}</div></SettingsCard><SettingsCard title="Accent colour"><div className="accent-row">{["purple", "blue", "green", "amber"].map((item) => <button key={item} type="button" className={`accent-choice ${accent === item ? "selected" : ""}`} onClick={() => setAccent(item)}><i className={`accent-${item}`} />{item}</button>)}</div><p className="settings-muted">Accent affects interface selection, buttons, focus states and links. It does not override green/red evidence, warnings or behaviour colours.</p></SettingsCard><SettingsCard title="Interface density"><OptionPicker value={density} onChange={setDensity} options={[{ id: "comfortable", title: "Comfortable", description: "More breathing room." }, { id: "compact", title: "Compact", description: "Recommended for most Aladdin workspaces." }, { id: "dense", title: "Dense", description: "Maximum information density for Terminal." }]} /></SettingsCard><SettingsCard title="Accessibility"><SettingsToggle label="Reduce motion" description="Limit non-essential interface movement." checked={reduceMotion} onChange={setReduceMotion} /></SettingsCard></div>;
+  const chooseTheme = (next: ThemeMode) => {
+    setTheme(next);
+    localStorage.setItem(ALADDIN_THEME_KEY, next);
+    applyThemePreferences(next);
+  };
+  const chooseDensity = (next: string) => {
+    setDensity(next);
+    localStorage.setItem(ALADDIN_DENSITY_KEY, next);
+    document.documentElement.dataset.density = next;
+  };
+  return <div className="settings-stack"><SettingsPageTitle eyebrow="Personalisation" title="Appearance" copy="Choose light or dark mode while keeping Aladdin’s purple primary interaction colour." /><SettingsCard title="Theme"><div className="theme-grid">{[{ id: "dark", name: "Dark", copy: "Default Aladdin dark workspace." }, { id: "light", name: "Light", copy: "Brighter workspace for daytime review." }, { id: "system", name: "System", copy: "Follow your device appearance." }].map((item) => <button key={item.id} type="button" className={`theme-card ${theme === item.id ? "selected" : ""} ${item.id}`} onClick={() => chooseTheme(item.id as ThemeMode)}><span /><b>{item.name}</b><small>{item.copy}</small></button>)}</div></SettingsCard><SettingsCard title="Primary interaction colour"><div className="accent-row"><button type="button" className="accent-choice selected purple"><i />Purple</button></div><p className="settings-muted">Purple is used for buttons, active navigation, selected tabs, focus states and links. Semantic evidence colours remain unchanged.</p></SettingsCard><SettingsCard title="Interface density"><div className="settings-options">{[["comfortable", "Comfortable", "More breathing room."], ["compact", "Compact", "Recommended for most Aladdin workspaces."], ["dense", "Dense", "Maximum information density for Terminal."]].map(([id, label, copy]) => <button key={id} type="button" className={density === id ? "selected" : ""} onClick={() => chooseDensity(id)}><b>{label}</b><span>{copy}</span></button>)}</div></SettingsCard><SettingsCard title="Accessibility"><SettingsToggle label="Reduce motion" description="Minimise non-essential interface motion." checked={reduceMotion} onChange={setReduceMotion} /></SettingsCard></div>;
 }
 function LanguageSettings() {
   return <div className="settings-stack"><SettingsPageTitle eyebrow="Personalisation" title="Language" copy="Keep interface language simple. Ask IFÁ handles conversation language per question." /><SettingsCard title="Interface language"><SettingsField label="Language" hint="Controls the language used throughout the Aladdin interface."><select defaultValue="en-GB"><option value="en-GB">English (UK)</option></select></SettingsField></SettingsCard><SettingsCard title="Ask IFÁ language behaviour"><p className="settings-muted">Ask IFÁ automatically detects the language of your question and responds accordingly when supported. There is no separate conversation-language selector.</p></SettingsCard></div>;
@@ -556,7 +583,28 @@ function WalletPage({ address }: { address?: string }) { const wallet = wallets.
 function TrenchChart({ bundle }: { bundle: TokenBundle }) { const points = bundle.token.checkpoints.map((c, i) => ({ x: 16 + i * 28, y: 82 - ((c.market_cap_usd ?? 0) / Math.max(...bundle.token.checkpoints.map((p) => p.market_cap_usd ?? 0), 1)) * 56, c })); const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" "); const area = `${path} L ${points.at(-1)?.x ?? 100} 92 L ${points[0].x} 92 Z`; return <div className="trench"><svg viewBox="0 0 112 100" preserveAspectRatio="none"><defs><linearGradient id="trenchFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#8f5cff" stopOpacity="0.5" /><stop offset="100%" stopColor="#8f5cff" stopOpacity="0" /></linearGradient></defs><path className="gridline" d="M 0 25 H 112 M 0 50 H 112 M 0 75 H 112" /><path className="area" d={area} /><path className="line" d={path} />{points.map((p) => <circle key={p.c.checkpoint} cx={p.x} cy={p.y} r="2.4" />)}</svg><div className="trench-labels">{bundle.token.checkpoints.map((c) => <span key={c.checkpoint}>{c.checkpoint}</span>)}</div></div>; }
 function MiniTrench({ token }: { token: TokenRecord }) { const max = Math.max(...token.checkpoints.map((c) => c.market_cap_usd ?? 0), 1); const pts = token.checkpoints.map((c, i) => `${i * 33},${40 - ((c.market_cap_usd ?? 0) / max) * 30}`).join(" "); return <svg className="mini-trench" viewBox="0 0 100 44" preserveAspectRatio="none"><polyline points={pts} /></svg>; }
 function List({ items }: { items: string[] }) { return items.length ? <ul>{items.map((item) => <li key={item}>{item}</li>)}</ul> : <p className="muted">No missing inputs reported.</p>; }
-function App() { const current = useRoute(); const p = parts(); if (current === "/") return <Landing />; if (current === "/login") return <Login />; if (current === "/onboarding") return <Onboarding />; if (p[0] !== "app") return <Landing />; if (p[1] === "live") return <LiveTerminal />; if (p[1] === "token") return <TokenPage mint={p[2]} tab={p[3] || "trades"} />; if (p[1] === "wallet") return <WalletPage address={p[2]} />; if (p[1] === "ask-ifa") return <AskIfa />; if (p[1] === "settings") return <SettingsPage section={p[2]} />; return <LiveTerminal />; }
+function App() {
+  React.useEffect(() => {
+    applyThemePreferences();
+    document.documentElement.dataset.density = localStorage.getItem(ALADDIN_DENSITY_KEY) || "compact";
+    const media = window.matchMedia("(prefers-color-scheme: light)");
+    const onChange = () => applyThemePreferences();
+    media.addEventListener?.("change", onChange);
+    return () => media.removeEventListener?.("change", onChange);
+  }, []);
+  const current = useRoute();
+  const p = parts();
+  if (current === "/") return <Landing />;
+  if (current === "/login") return <Login />;
+  if (current === "/onboarding") return <Onboarding />;
+  if (p[0] !== "app") return <Landing />;
+  if (p[1] === "live") return <LiveTerminal />;
+  if (p[1] === "token") return <TokenPage mint={p[2]} tab={p[3] || "trades"} />;
+  if (p[1] === "wallet") return <WalletPage address={p[2]} />;
+  if (p[1] === "ask-ifa") return <AskIfa />;
+  if (p[1] === "settings") return <SettingsPage section={p[2]} />;
+  return <LiveTerminal />;
+}
 
 createRoot(document.getElementById("root")!).render(<App />);
 
