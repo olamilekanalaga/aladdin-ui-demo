@@ -1490,3 +1490,417 @@ button.behaviour:hover {
 .settings-nav.accordion .settings-nav-group > strong {
   display: none;
 }
+
+/* Aladdin public entry */
+.public-page,
+.account-entry {
+  display: block;
+  min-height: 100vh;
+  padding: 0;
+  background: radial-gradient(circle at 15% 0%, rgba(143,92,255,.24), transparent 35%), radial-gradient(circle at 90% 10%, rgba(47,216,255,.12), transparent 30%), var(--bg);
+}
+.public-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0;
+  backdrop-filter: blur(20px);
+}
+.public-brand {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  cursor: pointer;
+}
+.public-brand img,
+.login-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+.public-nav nav,
+.public-nav-actions,
+.public-footer {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.public-nav nav {
+  justify-content: center;
+}
+.public-nav a,
+.public-footer a,
+.login-links button {
+  color: var(--muted);
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.public-nav a:hover,
+.public-footer a:hover,
+.login-links button:hover {
+  color: var(--text);
+}
+.public-hero,
+.public-section,
+.login-layout {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+.public-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 520px);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+  padding: clamp(56px, 9vw, 120px) 0 70px;
+}
+.public-copy h1,
+.public-section h2,
+.account-card h1,
+.onboarding-card h1 {
+  margin: 0;
+  letter-spacing: -.06em;
+  line-height: .92;
+}
+.public-copy h1 {
+  max-width: 760px;
+  font-size: clamp(48px, 8vw, 94px);
+}
+.public-copy .lede {
+  max-width: 670px;
+  color: var(--muted);
+  font-size: clamp(18px, 2vw, 24px);
+}
+.anchor-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.principle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+.principle span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 13px;
+  color: var(--muted);
+  background: rgba(255,255,255,.05);
+}
+.public-product-preview,
+.public-ifa-preview,
+.two-panel > article,
+.capability-grid article,
+.everywhere-section > div,
+.access-section,
+.onboarding-card {
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background: linear-gradient(145deg, rgba(22,18,39,.96), rgba(6,5,16,.92));
+  box-shadow: 0 26px 70px rgba(0,0,0,.34);
+}
+.public-product-preview,
+.public-ifa-preview {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+.preview-top,
+.preview-token {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.preview-top span {
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: var(--purple-2);
+}
+.preview-top small,
+.preview-token span,
+.section-heading p,
+.capability-grid p,
+.everywhere-section p,
+.access-section p,
+.login-fineprint,
+.auth-lock {
+  color: var(--muted);
+}
+.preview-search {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 13px 15px;
+  color: var(--muted);
+  background: rgba(255,255,255,.06);
+}
+.preview-token > div {
+  display: grid;
+  margin-right: auto;
+}
+.preview-metrics,
+.ifa-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.preview-table {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px 12px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.preview-table.small {
+  grid-template-columns: 1fr auto auto;
+}
+.preview-table > span {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+.preview-table-row {
+  display: contents;
+}
+.public-section {
+  padding: 64px 0;
+}
+.section-heading {
+  display: grid;
+  gap: 10px;
+  max-width: 780px;
+  margin-bottom: 22px;
+}
+.section-heading h2,
+.access-section h2 {
+  font-size: clamp(34px, 5vw, 62px);
+}
+.two-panel,
+.capability-grid,
+.everywhere-section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.two-panel > article,
+.capability-grid article,
+.everywhere-section > div,
+.access-section {
+  padding: 24px;
+}
+.two-panel > article {
+  display: grid;
+  gap: 18px;
+}
+.capability-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ifa-line {
+  display: grid;
+  gap: 6px;
+  border-left: 2px solid rgba(143,92,255,.45);
+  padding-left: 14px;
+}
+.ifa-line b,
+.ifa-follow-up b {
+  color: var(--purple-2);
+  letter-spacing: .14em;
+  font-size: 12px;
+}
+.ifa-line p,
+.ifa-follow-up p {
+  margin: 0;
+}
+.evidence-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.evidence-actions button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: var(--text);
+  background: rgba(255,255,255,.05);
+}
+.ifa-follow-up {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  border: 1px solid rgba(198,171,255,.14);
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(255,255,255,.04);
+}
+.terminal-demo-section .public-product-preview,
+.ask-demo-section .public-ifa-preview {
+  max-width: 860px;
+}
+.access-section {
+  text-align: center;
+}
+.access-section p {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.public-footer {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 34px 0 46px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+.public-footer b {
+  color: var(--text);
+  margin-right: auto;
+}
+.login-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  padding: clamp(42px, 7vw, 92px) 0;
+}
+.account-card,
+.onboarding-card {
+  text-align: left;
+}
+.account-card {
+  width: 100%;
+}
+.account-card h1,
+.onboarding-card h1 {
+  font-size: clamp(38px, 6vw, 64px);
+}
+.auth-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 15px 16px;
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  font-weight: 800;
+  cursor: pointer;
+}
+.auth-button span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(143,92,255,.22);
+}
+.auth-lock {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.login-links {
+  display: flex;
+  gap: 14px;
+}
+.login-preview {
+  min-width: 0;
+}
+.onboarding-page {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.onboarding-card {
+  width: min(680px, 100%);
+  padding: clamp(28px, 5vw, 46px);
+  display: grid;
+  gap: 18px;
+}
+.onboarding-options,
+.start-choice-grid {
+  display: grid;
+  gap: 12px;
+}
+.onboarding-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.onboarding-options button,
+.start-choice-grid button {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 15px;
+  color: var(--text);
+  background: rgba(255,255,255,.05);
+  text-align: left;
+  cursor: pointer;
+}
+.onboarding-options button.selected,
+.start-choice-grid button:hover,
+.auth-button:hover {
+  border-color: rgba(143,92,255,.7);
+  background: rgba(143,92,255,.16);
+}
+.start-choice-grid button {
+  display: grid;
+  gap: 8px;
+}
+.start-choice-grid span {
+  color: var(--muted);
+}
+.onboarding-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+@media (max-width: 920px) {
+  .public-nav,
+  .public-hero,
+  .login-layout,
+  .two-panel,
+  .capability-grid,
+  .everywhere-section {
+    grid-template-columns: 1fr;
+  }
+  .public-nav nav {
+    order: 3;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+  .login-preview {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .public-nav-actions,
+  .preview-metrics,
+  .ifa-proof-grid,
+  .onboarding-options,
+  .public-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .public-copy h1 {
+    font-size: 44px;
+  }
+}

@@ -42,10 +42,130 @@ function Panel({ title, icon: Icon, children }: { title: string; icon: React.Com
 function Table({ columns, rows }: { columns: string[]; rows: React.ReactNode[][] }) { if (!rows.length) return <Empty text="No rows available." />; return <div className="table-wrap"><table><thead><tr>{columns.map((c) => <th key={c}>{c}</th>)}</tr></thead><tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={`${i}-${j}`}>{c}</td>)}</tr>)}</tbody></table></div>; }
 function Empty({ text }: { text: string }) { return <div className="empty"><AlertTriangle size={18} />{text}</div>; }
 
-function Landing() {
-  return <main className="landing"><section className="landing-card"><p className="eyebrow">Aladdin terminal</p><h1>Live Pump.fun intelligence with wallet behaviour.</h1><p className="lede">Aladdin watches tokens, trades, wallet behaviour, PnL, holdings and formations. Ask IFÁ waits until you ask a question.</p><div className="actions"><button className="primary" onClick={() => go("/login")}>Enter terminal</button><button className="ghost" onClick={() => go("/app/live")}>Open live view</button></div><div className="chips"><span>Live terminal</span><span>Wallet / CA search</span><span>Ask IFÁ on demand</span></div></section></main>;
+function PublicNav() {
+  return <header className="public-nav">
+    <button className="public-brand" onClick={() => go("/")}><img src={aladdinLogo} alt="Aladdin" /><span>Aladdin</span></button>
+    <nav>
+      <a href="#product">Product</a>
+      <a href="#access">Pricing</a>
+      <a href="#api">API</a>
+      <a href="#telegram">Telegram</a>
+    </nav>
+    <div className="public-nav-actions">
+      <button className="ghost" onClick={() => go("/login")}>Sign in</button>
+      <button className="primary" onClick={() => go("/login")}>Get started</button>
+    </div>
+  </header>;
 }
-function Login() { const [value, setValue] = useState(""); return <main className="login"><form className="login-card" onSubmit={(e) => { e.preventDefault(); sessionStorage.setItem("aladdin-demo-auth", value || "ok"); go("/app/live"); }}><Lock size={34} /><h1>Aladdin access</h1><p>Open the terminal workspace.</p><input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Enter access phrase" /><button className="primary">Open Aladdin</button></form></main>; }
+function DemoTerminalPreview() {
+  const bundle = bundles[0];
+  return <article className="public-product-preview">
+    <div className="preview-top"><span>ALADDIN</span><small>Demo interface</small></div>
+    <div className="preview-search">Search token / wallet / transaction...</div>
+    <div className="preview-token">
+      <Avatar token={bundle.token} />
+      <div><strong>${bundle.token.symbol}</strong><span>{bundle.token.name}</span></div>
+      <Pill tone="purple">demo evidence</Pill>
+    </div>
+    <div className="preview-metrics">
+      <Metric label="Market cap" value={fmtMoney(bundle.token.market_cap_usd, 0)} />
+      <Metric label="Holders" value={bundle.holders.length} />
+      <Metric label="Net flow" value="+4.7 SOL" />
+    </div>
+    <MiniTrench token={bundle.token} />
+    <div className="preview-table">
+      <span>Participants</span><span>Behaviour</span><span>Holding</span>
+      {bundle.first100.slice(0, 3).map((row) => <div className="preview-table-row" key={row.wallet}><b>{short(row.wallet)}</b><BehaviourBadge value={walletInfo(row.wallet).behaviour} /><b>{fmtPctWhole(row.retained_pct)}</b></div>)}
+    </div>
+  </article>;
+}
+function DemoIfaPreview({ compact = false }: { compact?: boolean }) {
+  return <article className={compact ? "public-ifa-preview compact" : "public-ifa-preview"}>
+    <div className="ifa-line user"><b>USER</b><p>Which first 100 buyers are still holding?</p></div>
+    <div className="ifa-line ifa"><b>IFÁ</b><p>38 of the first 100 buyers still hold a position.</p></div>
+    <div className="ifa-proof-grid">
+      <Metric label="Fully exited" value="62" />
+      <Metric label="Partial position" value="27" />
+      <Metric label="Majority retained" value="11" />
+    </div>
+    <div className="preview-table small">
+      <span>Wallet</span><span>Entry</span><span>Remaining</span>
+      <b>8xA...</b><b>#12</b><b>28%</b>
+      <b>3Df...</b><b>#19</b><b>59%</b>
+    </div>
+    {!compact && <div className="evidence-actions"><button>Chart</button><button>Full Table</button><button>Open in Terminal</button><button>Export</button></div>}
+  </article>;
+}
+function Landing() {
+  return <main className="landing public-page"><PublicNav /><section className="public-hero">
+    <div className="public-copy">
+      <p className="eyebrow">Aladdin Intelligence</p>
+      <h1>On-chain intelligence, however you want to investigate it.</h1>
+      <p className="lede">Search tokens and wallets, investigate directly through Terminal, or ask blockchain questions in natural language.</p>
+      <div className="actions"><button className="primary" onClick={() => go("/login")}>Get started</button><a className="ghost anchor-button" href="#ask-ifa-demo">Explore Ask IFÁ</a></div>
+      <div className="principle"><span>Evidence</span><span>Interpretation</span><span>Human decision</span></div>
+    </div>
+    <DemoTerminalPreview />
+  </section>
+  <section id="product" className="public-section">
+    <div className="section-heading"><p className="eyebrow">Product</p><h2>Two ways to investigate</h2><p>Terminal and Ask IFÁ are two interfaces into the same Aladdin intelligence system.</p></div>
+    <div className="two-panel">
+      <article><h3>Terminal</h3><p>Investigate blockchain evidence directly through structured workspaces, tables, charts and historical context.</p><DemoTerminalPreview /><button className="ghost" onClick={() => go("/app/live")}>Explore Terminal</button></article>
+      <article><h3>Ask IFÁ</h3><p>Ask blockchain questions in ordinary language and receive inspectable evidence as answers, tables, charts and historical comparisons.</p><DemoIfaPreview compact /><a className="ghost anchor-button" href="#ask-ifa-demo">Explore Ask IFÁ</a></article>
+    </div>
+  </section>
+  <section className="public-section">
+    <div className="section-heading"><p className="eyebrow">Capabilities</p><h2>Built around blockchain evidence</h2></div>
+    <div className="capability-grid">
+      {[
+        ["Token Intelligence", "Understand token formation, participants, flows, holders and lifecycle evidence."],
+        ["Wallet Intelligence", "Investigate wallet activity, positions, history and behaviour."],
+        ["Participants", "Understand who is participating and how different wallet cohorts behave."],
+        ["Live State", "Inspect current flow, participation and state changes."],
+        ["Historical Match", "Compare current formations against historically similar states."],
+        ["Early Buyers", "Investigate first buyers, retention, exits and concentration."]
+      ].map(([title, copy]) => <article key={title}><h3>{title}</h3><p>{copy}</p></article>)}
+    </div>
+  </section>
+  <section id="ask-ifa-demo" className="public-section ask-demo-section">
+    <div className="section-heading"><p className="eyebrow">Ask IFÁ</p><h2>Ask the chain</h2><p>Start with a question instead of a query language. Ask IFÁ returns structured evidence, not trading instructions.</p></div>
+    <DemoIfaPreview />
+    <div className="ifa-follow-up"><b>USER</b><p>Only show wallets that have done this across at least five tokens.</p><b>IFÁ</b><p>That reduces the cohort to 8 wallets. Open the evidence in Terminal for direct investigation.</p></div>
+  </section>
+  <section className="public-section terminal-demo-section">
+    <div className="section-heading"><p className="eyebrow">Terminal</p><h2>Investigate the evidence directly</h2><p>Terminal is for direct control: token identity, trench-style charts, trades, participants, first buyers, holders and live state.</p></div>
+    <DemoTerminalPreview />
+  </section>
+  <section className="public-section everywhere-section">
+    <div id="telegram"><h3>Aladdin on Telegram</h3><p>Paste a token contract, inspect a wallet, ask IFÁ or receive Aladdin alerts without leaving Telegram.</p><Pill tone="warn">Coming soon</Pill></div>
+    <div id="api"><h3>Build with Aladdin</h3><p>Access Aladdin intelligence programmatically for research, applications and automated workflows.</p><button className="ghost" disabled>API access coming soon</button></div>
+  </section>
+  <section id="access" className="public-section access-section">
+    <p className="eyebrow">Access</p><h2>Built for different levels of investigation</h2><p>Explore Aladdin with limited access. Upgrade options for deeper historical research, higher Ask IFÁ usage, Telegram and API access will be available as Aladdin develops.</p><button className="primary" onClick={() => go("/login")}>Get started</button>
+  </section>
+  <footer className="public-footer"><b>ALADDIN</b><span>Evidence-first on-chain intelligence.</span><a href="#product">Product</a><a href="#ask-ifa-demo">Ask IFÁ</a><a href="#api">API</a><a href="#telegram">Telegram</a></footer>
+  </main>;
+}
+function Login() {
+  const enter = (provider: "google" | "telegram") => {
+    sessionStorage.setItem("aladdin-demo-auth", `demo-${provider}`);
+    if (localStorage.getItem("aladdin-demo-onboarded") === "1") go("/app/live");
+    else go("/onboarding");
+  };
+  return <main className="login account-entry"><PublicNav /><section className="login-layout"><form className="login-card account-card" onSubmit={(e) => { e.preventDefault(); enter("google"); }}><img className="login-logo" src={aladdinLogo} alt="Aladdin" /><p className="eyebrow">Account entry</p><h1>Welcome to Aladdin</h1><p>Access Terminal, Ask IFÁ and your investigations from one account.</p><button className="auth-button" type="button" onClick={() => enter("google")}><span>G</span>Continue with Google</button><button className="auth-button" type="button" onClick={() => enter("telegram")}><span>T</span>Continue with Telegram</button><div className="auth-lock"><Lock size={15} />Mock account entry only. Real OAuth will replace these handlers later.</div><p className="login-fineprint">New to Aladdin? Your account will be created automatically.</p><div className="login-links"><button type="button">Terms of Service</button><button type="button">Privacy Policy</button></div></form><div className="login-preview"><DemoIfaPreview compact /></div></section></main>;
+}
+function Onboarding() {
+  const [step, setStep] = useState(1);
+  const [useCase, setUseCase] = useState("Trading");
+  const finish = (path: string) => {
+    localStorage.setItem("aladdin-demo-onboarded", "1");
+    go(path);
+  };
+  return <main className="login onboarding-page"><section className="onboarding-card">
+    <img className="login-logo" src={aladdinLogo} alt="Aladdin" />
+    {step === 1 ? <><p className="eyebrow">First setup</p><h1>Welcome to Aladdin</h1><p>How do you primarily use on-chain data?</p><div className="onboarding-options">{["Trading", "Research", "Analysis", "Protocol / Team", "Other"].map((item) => <button key={item} className={useCase === item ? "selected" : ""} onClick={() => setUseCase(item)}>{item}</button>)}</div><div className="onboarding-actions"><button className="ghost" onClick={() => finish("/app/live")}>Skip for now</button><button className="primary" onClick={() => setStep(2)}>Continue</button></div></> : <><p className="eyebrow">Start point</p><h1>Where would you like to start?</h1><p>Your selected use case: {useCase}. You can change direction anytime.</p><div className="start-choice-grid"><button onClick={() => finish("/app/ask-ifa")}><b>Ask IFÁ</b><span>Ask blockchain questions in natural language and receive structured evidence.</span></button><button onClick={() => finish("/app/live")}><b>Terminal</b><span>Investigate tokens, wallets and historical evidence directly.</span></button></div><button className="settings-subtle-button" onClick={() => finish("/app/live")}>Skip for now</button></>}
+  </section></main>;
+}
 
 function Shell({ active, children }: { active: string; children: React.ReactNode }) {
   const [query, setQuery] = useState("");
@@ -368,7 +488,7 @@ function SettingsShell({ active, children }: { active: string; children: React.R
   React.useEffect(() => {
     setOpenGroup(settingsGroupForSlug(active));
   }, [active]);
-  return <Shell active="settings"><section className="settings-workspace"><header className="settings-header"><div><p className="eyebrow"><SettingsIcon size={15} />Control centre</p><h1>Settings</h1><p>Manage your Aladdin identity, access, integrations and product preferences.</p></div><Pill tone="purple">Demo settings</Pill></header><div className="settings-layout"><nav className="settings-nav accordion" aria-label="Settings navigation">{SETTINGS_GROUPS.map((group) => { const isOpen = openGroup === group.group; return <div className="settings-nav-group" key={group.group}><button className="settings-group-head" type="button" aria-expanded={isOpen} onClick={() => setOpenGroup(group.group)}><span>{group.group}</span><b>{isOpen ? "−" : "+"}</b></button>{isOpen && <div className="settings-subnav">{group.items.map((item) => <button key={item.slug} type="button" className={active === item.slug ? "active" : ""} onClick={() => go(`/app/settings/${item.slug}`)}>{item.label}</button>)}</div>}</div>; })}</nav><section className="settings-panel-area" aria-label={SETTINGS_LABELS[active]}>{children}</section></div></section></Shell>;
+  return <Shell active="settings"><section className="settings-workspace"><header className="settings-header"><div><p className="eyebrow"><SettingsIcon size={15} />Control centre</p><h1>Settings</h1><p>Manage your Aladdin identity, access, integrations and product preferences.</p></div><Pill tone="purple">Demo settings</Pill></header><div className="settings-layout"><nav className="settings-nav accordion" aria-label="Settings navigation">{SETTINGS_GROUPS.map((group) => { const isOpen = openGroup === group.group; return <div className="settings-nav-group" key={group.group}><button className="settings-group-head" type="button" aria-expanded={isOpen} onClick={() => setOpenGroup(group.group)}><span>{group.group}</span><b>{isOpen ? "-" : "+"}</b></button>{isOpen && <div className="settings-subnav">{group.items.map((item) => <button key={item.slug} type="button" className={active === item.slug ? "active" : ""} onClick={() => go(`/app/settings/${item.slug}`)}>{item.label}</button>)}</div>}</div>; })}</nav><section className="settings-panel-area" aria-label={SETTINGS_LABELS[active]}>{children}</section></div></section></Shell>;
 }
 function SettingsPage({ section }: { section?: string }) {
   const active = cleanSettingsSlug(section);
@@ -416,16 +536,16 @@ function TelegramSettings() {
   const [historicalAlerts, setHistoricalAlerts] = useState(true);
   const [watchedAlerts, setWatchedAlerts] = useState(true);
   const [savedAlerts, setSavedAlerts] = useState(true);
-  return <div className="settings-stack"><SettingsPageTitle eyebrow="Aladdin" title="Telegram" copy="Use Aladdin intelligence from Telegram. Telegram is an interface, not a separate intelligence system." /><SettingsCard title="Status"><div className="telegram-status"><StatusDot text="Connected" /><b>@ola_crrypt</b><button className="ghost" type="button">Open Aladdin Bot</button><button className="settings-subtle-button" type="button">Disconnect</button></div></SettingsCard><SettingsCard title="Available in Telegram"><div className="feature-checks">{["Paste token CA", "Paste wallet address", "Ask IFÁ", "Receive alerts", "Open results in Aladdin"].map((item) => <span key={item}>✓ {item}</span>)}</div><p className="settings-muted">Capabilities are product-direction/demo states unless backend support exists.</p></SettingsCard><SettingsCard title="Alert delivery"><SettingsToggle label="Historical Match alerts" description="Notify when saved historical matches update." checked={historicalAlerts} onChange={setHistoricalAlerts} /><SettingsToggle label="Watched token alerts" description="Notify when watched tokens change state." checked={watchedAlerts} onChange={setWatchedAlerts} /><SettingsToggle label="Saved alerts" description="Notify for manually saved alerts." checked={savedAlerts} onChange={setSavedAlerts} /></SettingsCard><SettingsCard title="Pair Telegram"><div className="pairing-box"><ol><li>Open the Aladdin Telegram bot.</li><li>Send the pairing command.</li><li>Enter this one-time code.</li></ol><strong>ALD-7X42</strong><small>Expires in 10 minutes.</small><button className="ghost" type="button">Copy Code</button><button className="settings-subtle-button" type="button">Regenerate pairing code</button></div></SettingsCard></div>;
+  return <div className="settings-stack"><SettingsPageTitle eyebrow="Aladdin" title="Telegram" copy="Use Aladdin intelligence from Telegram. Telegram is an interface, not a separate intelligence system." /><SettingsCard title="Status"><div className="telegram-status"><StatusDot text="Connected" /><b>@ola_crrypt</b><button className="ghost" type="button">Open Aladdin Bot</button><button className="settings-subtle-button" type="button">Disconnect</button></div></SettingsCard><SettingsCard title="Available in Telegram"><div className="feature-checks">{["Paste token CA", "Paste wallet address", "Ask IFÁ", "Receive alerts", "Open results in Aladdin"].map((item) => <span key={item}>? {item}</span>)}</div><p className="settings-muted">Capabilities are product-direction/demo states unless backend support exists.</p></SettingsCard><SettingsCard title="Alert delivery"><SettingsToggle label="Historical Match alerts" description="Notify when saved historical matches update." checked={historicalAlerts} onChange={setHistoricalAlerts} /><SettingsToggle label="Watched token alerts" description="Notify when watched tokens change state." checked={watchedAlerts} onChange={setWatchedAlerts} /><SettingsToggle label="Saved alerts" description="Notify for manually saved alerts." checked={savedAlerts} onChange={setSavedAlerts} /></SettingsCard><SettingsCard title="Pair Telegram"><div className="pairing-box"><ol><li>Open the Aladdin Telegram bot.</li><li>Send the pairing command.</li><li>Enter this one-time code.</li></ol><strong>ALD-7X42</strong><small>Expires in 10 minutes.</small><button className="ghost" type="button">Copy Code</button><button className="settings-subtle-button" type="button">Regenerate pairing code</button></div></SettingsCard></div>;
 }
 function ApiSettings() {
   return <div className="settings-stack"><SettingsPageTitle eyebrow="Aladdin" title="API" copy="Developer access for Aladdin evidence. Full API keys are never shown after creation." /><SettingsCard title="API access"><Metric label="Access" value="Pro" /><div className="usage-hero compact"><span>Requests this month</span><ProgressBar value={37} /><small>18,429 / 50,000</small></div></SettingsCard><SettingsCard title="API keys" action={<button className="ghost" type="button">+ Create API Key</button>}><div className="api-key-row"><div><b>Production</b><code>al_live_••••••••••••4x8a</code></div><span>Created<br />10 Aug 2026</span><span>Last used<br />4 minutes ago</span><button className="danger-button subtle" type="button">Revoke</button></div></SettingsCard><SettingsCard title="API navigation"><div className="settings-action-row"><button className="ghost" type="button">Documentation</button><button className="ghost" type="button">Usage</button><button className="ghost" type="button">API Status</button></div></SettingsCard></div>;
 }
 function PlanBillingSettings() {
-  return <div className="settings-stack"><SettingsPageTitle eyebrow="Subscription" title="Plan & Billing" copy="Subscription management UI with placeholder pricing until final plans are defined." /><SettingsCard title="Current plan"><div className="plan-card"><small>ALADDIN PRO</small><strong>£XX / month</strong><span>Next billing date: 1 September 2026</span><button className="primary" type="button">Manage Plan</button></div></SettingsCard><SettingsCard title="Included"><div className="feature-checks">{["Terminal", "Ask IFÁ", "Historical Match", "Telegram", "Ifá credits", "API allowance"].map((item) => <span key={item}>✓ {item}</span>)}</div></SettingsCard><SettingsCard title="Payment method"><SettingsRows rows={[["Visa •••• 4242", "Mock", <button className="settings-subtle-button" type="button">Update</button>]]} /></SettingsCard><SettingsCard title="Billing history"><Table columns={["Month", "Amount", "Status", "Action"]} rows={[["Aug 2026", "£XX", "Paid", <button className="settings-subtle-button" type="button">Invoice</button>], ["Jul 2026", "£XX", "Paid", <button className="settings-subtle-button" type="button">Invoice</button>]]} /></SettingsCard></div>;
+  return <div className="settings-stack"><SettingsPageTitle eyebrow="Subscription" title="Plan & Billing" copy="Subscription management UI with placeholder pricing until final plans are defined." /><SettingsCard title="Current plan"><div className="plan-card"><small>ALADDIN PRO</small><strong>£XX / month</strong><span>Next billing date: 1 September 2026</span><button className="primary" type="button">Manage Plan</button></div></SettingsCard><SettingsCard title="Included"><div className="feature-checks">{["Terminal", "Ask IFÁ", "Historical Match", "Telegram", "Ifá credits", "API allowance"].map((item) => <span key={item}>? {item}</span>)}</div></SettingsCard><SettingsCard title="Payment method"><SettingsRows rows={[["Visa •••• 4242", "Mock", <button className="settings-subtle-button" type="button">Update</button>]]} /></SettingsCard><SettingsCard title="Billing history"><Table columns={["Month", "Amount", "Status", "Action"]} rows={[["Aug 2026", "£XX", "Paid", <button className="settings-subtle-button" type="button">Invoice</button>], ["Jul 2026", "£XX", "Paid", <button className="settings-subtle-button" type="button">Invoice</button>]]} /></SettingsCard></div>;
 }
 function TutorialSettings() {
-  return <div className="settings-stack"><SettingsPageTitle eyebrow="Help" title="Learn Aladdin" copy="Onboarding centre for understanding Aladdin’s investigation workflow." /><SettingsCard title="Your progress"><div className="usage-hero compact"><ProgressBar value={64} /><small>64% complete</small></div></SettingsCard>{[{ title: "Getting Started", items: ["✓ Understanding Launches", "✓ Investigating a token", "○ Investigating a wallet"] }, { title: "Ask IFÁ", items: ["○ Asking your first question", "○ Working with follow-up questions", "○ Tables, charts and evidence"] }, { title: "Terminal", items: ["○ Token Intelligence", "○ Participants", "○ Historical Match"] }, { title: "Integrations", items: ["○ Telegram", "○ API"] }].map((group) => <SettingsCard key={group.title} title={group.title}><div className="lesson-list">{group.items.map((item) => <span key={item}>{item}</span>)}</div></SettingsCard>)}<button className="ghost" type="button">Restart Product Tour</button></div>;
+  return <div className="settings-stack"><SettingsPageTitle eyebrow="Help" title="Learn Aladdin" copy="Onboarding centre for understanding Aladdin’s investigation workflow." /><SettingsCard title="Your progress"><div className="usage-hero compact"><ProgressBar value={64} /><small>64% complete</small></div></SettingsCard>{[{ title: "Getting Started", items: ["? Understanding Launches", "? Investigating a token", "? Investigating a wallet"] }, { title: "Ask IFÁ", items: ["? Asking your first question", "? Working with follow-up questions", "? Tables, charts and evidence"] }, { title: "Terminal", items: ["? Token Intelligence", "? Participants", "? Historical Match"] }, { title: "Integrations", items: ["? Telegram", "? API"] }].map((group) => <SettingsCard key={group.title} title={group.title}><div className="lesson-list">{group.items.map((item) => <span key={item}>{item}</span>)}</div></SettingsCard>)}<button className="ghost" type="button">Restart Product Tour</button></div>;
 }
 function MobileAppSettings() {
   const [email, setEmail] = useState("ol••••••@gmail.com");
@@ -436,7 +556,7 @@ function WalletPage({ address }: { address?: string }) { const wallet = wallets.
 function TrenchChart({ bundle }: { bundle: TokenBundle }) { const points = bundle.token.checkpoints.map((c, i) => ({ x: 16 + i * 28, y: 82 - ((c.market_cap_usd ?? 0) / Math.max(...bundle.token.checkpoints.map((p) => p.market_cap_usd ?? 0), 1)) * 56, c })); const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" "); const area = `${path} L ${points.at(-1)?.x ?? 100} 92 L ${points[0].x} 92 Z`; return <div className="trench"><svg viewBox="0 0 112 100" preserveAspectRatio="none"><defs><linearGradient id="trenchFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#8f5cff" stopOpacity="0.5" /><stop offset="100%" stopColor="#8f5cff" stopOpacity="0" /></linearGradient></defs><path className="gridline" d="M 0 25 H 112 M 0 50 H 112 M 0 75 H 112" /><path className="area" d={area} /><path className="line" d={path} />{points.map((p) => <circle key={p.c.checkpoint} cx={p.x} cy={p.y} r="2.4" />)}</svg><div className="trench-labels">{bundle.token.checkpoints.map((c) => <span key={c.checkpoint}>{c.checkpoint}</span>)}</div></div>; }
 function MiniTrench({ token }: { token: TokenRecord }) { const max = Math.max(...token.checkpoints.map((c) => c.market_cap_usd ?? 0), 1); const pts = token.checkpoints.map((c, i) => `${i * 33},${40 - ((c.market_cap_usd ?? 0) / max) * 30}`).join(" "); return <svg className="mini-trench" viewBox="0 0 100 44" preserveAspectRatio="none"><polyline points={pts} /></svg>; }
 function List({ items }: { items: string[] }) { return items.length ? <ul>{items.map((item) => <li key={item}>{item}</li>)}</ul> : <p className="muted">No missing inputs reported.</p>; }
-function App() { const current = useRoute(); const p = parts(); if (current === "/") return <Landing />; if (current === "/login") return <Login />; if (p[0] !== "app") return <Landing />; if (p[1] === "live") return <LiveTerminal />; if (p[1] === "token") return <TokenPage mint={p[2]} tab={p[3] || "trades"} />; if (p[1] === "wallet") return <WalletPage address={p[2]} />; if (p[1] === "ask-ifa") return <AskIfa />; if (p[1] === "settings") return <SettingsPage section={p[2]} />; return <LiveTerminal />; }
+function App() { const current = useRoute(); const p = parts(); if (current === "/") return <Landing />; if (current === "/login") return <Login />; if (current === "/onboarding") return <Onboarding />; if (p[0] !== "app") return <Landing />; if (p[1] === "live") return <LiveTerminal />; if (p[1] === "token") return <TokenPage mint={p[2]} tab={p[3] || "trades"} />; if (p[1] === "wallet") return <WalletPage address={p[2]} />; if (p[1] === "ask-ifa") return <AskIfa />; if (p[1] === "settings") return <SettingsPage section={p[2]} />; return <LiveTerminal />; }
 
 createRoot(document.getElementById("root")!).render(<App />);
 
