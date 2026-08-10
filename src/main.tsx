@@ -359,9 +359,16 @@ const SETTINGS_GROUPS = [
 const SETTINGS_SLUGS = new Set(SETTINGS_GROUPS.flatMap((group) => group.items.map((item) => item.slug)));
 const SETTINGS_LABELS = Object.fromEntries(SETTINGS_GROUPS.flatMap((group) => group.items.map((item) => [item.slug, item.label])));
 function cleanSettingsSlug(section?: string) { return section && SETTINGS_SLUGS.has(section) ? section : "profile"; }
+function settingsGroupForSlug(slug: string) {
+  return SETTINGS_GROUPS.find((group) => group.items.some((item) => item.slug === slug))?.group ?? "ACCOUNT";
+}
 
 function SettingsShell({ active, children }: { active: string; children: React.ReactNode }) {
-  return <Shell active="settings"><section className="settings-workspace"><header className="settings-header"><div><p className="eyebrow"><SettingsIcon size={15} />Control centre</p><h1>Settings</h1><p>Manage your Aladdin identity, access, integrations and product preferences.</p></div><Pill tone="purple">Demo settings</Pill></header><div className="settings-layout"><nav className="settings-nav" aria-label="Settings navigation">{SETTINGS_GROUPS.map((group) => <div className="settings-nav-group" key={group.group}><strong>{group.group}</strong>{group.items.map((item) => <button key={item.slug} type="button" className={active === item.slug ? "active" : ""} onClick={() => go(`/app/settings/${item.slug}`)}>{item.label}</button>)}</div>)}</nav><section className="settings-panel-area" aria-label={SETTINGS_LABELS[active]}>{children}</section></div></section></Shell>;
+  const [openGroup, setOpenGroup] = useState(settingsGroupForSlug(active));
+  React.useEffect(() => {
+    setOpenGroup(settingsGroupForSlug(active));
+  }, [active]);
+  return <Shell active="settings"><section className="settings-workspace"><header className="settings-header"><div><p className="eyebrow"><SettingsIcon size={15} />Control centre</p><h1>Settings</h1><p>Manage your Aladdin identity, access, integrations and product preferences.</p></div><Pill tone="purple">Demo settings</Pill></header><div className="settings-layout"><nav className="settings-nav accordion" aria-label="Settings navigation">{SETTINGS_GROUPS.map((group) => { const isOpen = openGroup === group.group; return <div className="settings-nav-group" key={group.group}><button className="settings-group-head" type="button" aria-expanded={isOpen} onClick={() => setOpenGroup(group.group)}><span>{group.group}</span><b>{isOpen ? "−" : "+"}</b></button>{isOpen && <div className="settings-subnav">{group.items.map((item) => <button key={item.slug} type="button" className={active === item.slug ? "active" : ""} onClick={() => go(`/app/settings/${item.slug}`)}>{item.label}</button>)}</div>}</div>; })}</nav><section className="settings-panel-area" aria-label={SETTINGS_LABELS[active]}>{children}</section></div></section></Shell>;
 }
 function SettingsPage({ section }: { section?: string }) {
   const active = cleanSettingsSlug(section);
@@ -432,4 +439,6 @@ function List({ items }: { items: string[] }) { return items.length ? <ul>{items
 function App() { const current = useRoute(); const p = parts(); if (current === "/") return <Landing />; if (current === "/login") return <Login />; if (p[0] !== "app") return <Landing />; if (p[1] === "live") return <LiveTerminal />; if (p[1] === "token") return <TokenPage mint={p[2]} tab={p[3] || "trades"} />; if (p[1] === "wallet") return <WalletPage address={p[2]} />; if (p[1] === "ask-ifa") return <AskIfa />; if (p[1] === "settings") return <SettingsPage section={p[2]} />; return <LiveTerminal />; }
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+
 
