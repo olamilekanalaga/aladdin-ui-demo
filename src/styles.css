@@ -1987,3 +1987,38 @@ button.behaviour:hover {
 .accent-choice.purple i {
   background: linear-gradient(135deg, var(--purple), var(--purple-2));
 }
+
+/* Light-mode contrast corrections for behaviour labels and wallet links */
+:root[data-theme="light"] .behaviour-fresh-wallet {
+  color: #8a6400 !important;
+}
+:root[data-theme="light"] .behaviour-creator {
+  color: #08703a !important;
+}
+:root[data-theme="light"] .behaviour-migration-specialist {
+  color: #5b2fd6 !important;
+}
+:root[data-theme="light"] .behaviour-scalper {
+  color: #c91f3d !important;
+}
+:root[data-theme="light"] .behaviour-sniper {
+  color: #006f8d !important;
+}
+:root[data-theme="light"] .behaviour,
+:root[data-theme="light"] button.behaviour {
+  font-weight: 950;
+}
+:root[data-theme="light"] .text-link,
+:root[data-theme="light"] .copy,
+:root[data-theme="light"] .preview-table a,
+:root[data-theme="light"] .table-wrap a {
+  color: #4b20bf;
+  font-weight: 850;
+}
+:root[data-theme="light"] .text-link:hover,
+:root[data-theme="light"] .copy:hover,
+:root[data-theme="light"] .preview-table a:hover,
+:root[data-theme="light"] .table-wrap a:hover {
+  color: #35128f;
+  text-decoration: underline;
+}
