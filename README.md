@@ -2,7 +2,7 @@
 
 Evidence-first frontend prototype for Aladdin with Ask IFA.
 
-This repository is a frontend-only Vite + React demo. It uses structured mock data that mirrors the future backend contract, but it does not connect to live Aladdin services.
+This repository is a frontend-only Next.js (App Router) demo. It uses structured mock data that mirrors the future backend contract, but it does not connect to live Aladdin services.
 
 ## Product stance
 
@@ -22,7 +22,8 @@ The interface is designed to answer one trading-research question:
 - Launches: New Launches, Pre-Migration, Migrated, Discovery / Trending.
 - Token Intelligence: trade facts, first 100 buyer retention, participants, holders, live-state evidence, formation checkpoints and historical matches.
 - Wallet Intelligence: wallet temperament and wallet-token behaviour.
-- Live Terminal: token stream, wallet/CA search, trench charts and labels.\n- Ask IFA: quiet query layer with table output and CSV export when the user asks.
+- Live Terminal: token stream, wallet/CA search, trench charts and labels.
+- Ask IFA: quiet query layer with table output and CSV export when the user asks.
 
 ## Formation model
 
@@ -45,25 +46,45 @@ Unknown backend values are rendered as `Unavailable`, not zero.
 
 ## Routes
 
-- `/`
-- `/login`
-- `/app/launches/new`
-- `/app/launches/premigration`
-- `/app/launches/migrated`
-- `/app/launches/trending`
-- `/app/token/:mint/overview`
-- `/app/token/:mint/first-100`
-- `/app/token/:mint/formation-evidence`
-- `/app/wallet/:address`
-- `/app/live\n- `/app/ask-ifa``
+Public:
 
-`vercel.json` rewrites nested routes to `index.html` so browser refresh does not 404.
+- `/` — Landing
+- `/login` — Account entry
+- `/onboarding` — First setup
+
+Terminal (authenticated shell):
+
+- `/live` — Live Terminal
+- `/token/:mint/:tab` — Token intelligence (`trades`, `participants`, `most-profitable`, `largest-holders`, `first-100`, `holders`, `overview`)
+- `/token/:mint` — Redirects to `/token/:mint/trades`
+- `/wallet/:address` — Wallet display
+- `/ask-ifa` — Ask IFÁ conversational evidence
+- `/settings/:section` — Settings (`profile`, `account-security`, `appearance`, `language`, `ask-ifa`, `ifa-usage`, `telegram`, `api`, `plan-billing`, `tutorial`, `mobile-app`)
+- `/settings` — Redirects to `/settings/profile`
+
+## Structure
+
+The project follows the `nestfunded` App Router layout:
+
+- `app/` — routes, `layout.tsx`, `globals.css`
+- `app/components/` — shared UI components
+- `app/data/` — demo fixtures (bundles, wallets)
+- `app/types/` — shared TypeScript types
+- `app/utils/` — formatters, navigation, theme, search, settings
+- `app/live/`, `app/token/`, `app/wallet/`, `app/ask-ifa/`, `app/settings/` — page-specific components
+- `public/` — static assets
 
 ## Local development
 
 ```bash
 npm install
 npm run dev
+```
+
+Run the demo on port 5174:
+
+```bash
+npm run demo
 ```
 
 ## Build

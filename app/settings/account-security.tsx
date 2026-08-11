@@ -1,0 +1,7 @@
+"use client";
+
+import { SettingsCard, SettingsPageTitle, SettingsRows, StatusDot } from "./primitives";
+
+export function AccountSecuritySettings() {
+  return <div className="settings-stack"><SettingsPageTitle eyebrow="Account" title="Account & Security" copy="Manage sign-in methods, your single connected wallet and account sessions." /><SettingsCard title="Sign-in methods"><SettingsRows rows={[["Google", "ol••••••@gmail.com", <StatusDot text="Connected" />]]} /></SettingsCard><SettingsCard title="Connected wallet"><div className="settings-callout"><b>7xKX...91pQ</b><StatusDot text="Connected" /><p>Your connected wallet represents your Aladdin account for supported wallet-authenticated features.</p><p>Only one wallet can be connected at a time.</p><button className="ghost" type="button">Disconnect</button></div><div className="settings-note"><b>Connected wallet is not investigated wallet.</b><span>You can investigate unlimited external wallets in Search, Terminal or Ask IFÁ without connecting them to your account.</span></div></SettingsCard><SettingsCard title="Active sessions"><SettingsRows rows={[["iPhone · Safari", "Current", <StatusDot text="Active" />], ["Windows · Chrome", "2 hours ago", <button className="settings-subtle-button" type="button">Review</button>]]} /><button className="ghost" type="button">Sign out other sessions</button></SettingsCard><SettingsCard title="Danger zone"><button className="danger-button" type="button">Delete Aladdin Account</button></SettingsCard></div>;
+}

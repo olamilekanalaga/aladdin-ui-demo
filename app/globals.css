@@ -11,8 +11,10 @@
   --green: #56f29a;
   --red: #ff5f78;
   --amber: #f7c95f;
-  font-family: "Space Grotesk", "Sora", "Segoe UI", sans-serif;
+  font-family: var(--font-display), "Segoe UI", sans-serif;
 }
+code, pre, th, td, .metric, .pill, .confidence, .eyebrow, .trench-labels, .avatar { font-family: var(--font-mono), monospace; }
+.landing h1, .header h1, .token-hero h1 { font-family: var(--font-serif), serif; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; color: var(--text); background: radial-gradient(circle at 12% 14%, rgba(143,92,255,.28), transparent 28%), radial-gradient(circle at 80% 2%, rgba(86,242,154,.12), transparent 24%), linear-gradient(135deg,#03020a,#090618 52%,#100d1d); }
 button, input, textarea { font: inherit; }
@@ -25,9 +27,9 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .login-card input, .top-search input, .search-box input, .query-box textarea { width: 100%; border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; color: var(--text); background: rgba(255,255,255,.06); outline: 0; }
 .query-box textarea { min-height: 132px; resize: vertical; }
 h1 { margin: 0; letter-spacing: -.055em; }
-.landing h1 { max-width: 790px; font-size: clamp(42px,8vw,92px); line-height: .9; }
-.header h1, .token-hero h1 { font-size: clamp(34px,5vw,58px); }
-.lede { max-width: 690px; color: var(--muted); font-size: 19px; line-height: 1.7; }
+.landing h1 { max-width: 790px; font-size: 12px; line-height: .9; }
+.header h1, .token-hero h1 { font-size: 12px; }
+.lede { max-width: 690px; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .eyebrow { display: inline-flex; gap: 8px; align-items: center; margin: 0 0 8px; color: var(--purple-2); text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 900; }
 .actions, .chips, .tabs, .suggestions, .checkpoint-row, .hero-pills { display: flex; flex-wrap: wrap; gap: 10px; }
 .primary, .ghost, .tabs button, .checkpoint-row button, .suggestions button, .card-link, .text-link, .copy, .result, aside nav button, .brand, .csv-button { border: 0; color: var(--text); }
@@ -53,10 +55,10 @@ aside nav button.active, aside nav button:hover { color: var(--purple-2); backgr
 .live-layout { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 18px; align-items: start; }
 .terminal-cards { grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); }
 .card, .panel, .stream-panel { padding: 20px; }
-.panel h2, .stream-panel h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 18px; }
+.panel h2, .stream-panel h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 12px; }
 .token-head { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
 .avatar { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; color: white; background: linear-gradient(135deg,var(--purple),#41e695); font-weight: 900; }
-.avatar.large { width: 74px; height: 74px; border-radius: 24px; font-size: 22px; }
+.avatar.large { width: 74px; height: 74px; border-radius: 24px; font-size: 12px; }
 .token-title { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .copy, .text-link { display: inline-flex; align-items: center; gap: 6px; padding: 0; background: transparent; color: var(--muted); }
 .text-link { color: var(--purple-2); }
@@ -237,7 +239,8 @@ button.behaviour {
   color: var(--text);
   border-radius: 13px;
   padding: 9px 14px;
-  font-weight: 800;
+  font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
 }
 
@@ -349,7 +352,7 @@ button.behaviour:hover {
 }
 
 .chat-hero h1 {
-  font-size: clamp(44px, 7vw, 76px);
+  font-size: 12px;
   letter-spacing: -0.06em;
 }
 
@@ -357,7 +360,7 @@ button.behaviour:hover {
   margin: 14px auto 0;
   max-width: 720px;
   color: var(--muted);
-  font-size: 17px;
+  font-size: 12px;
 }
 
 .assistant-row {
@@ -405,7 +408,7 @@ button.behaviour:hover {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .ifa-chat .question-list button span {
@@ -510,14 +513,14 @@ button.behaviour:hover {
 }
 
 .ifa-page-header h1 {
-  font-size: clamp(38px, 6vw, 70px);
+  font-size: 12px;
   letter-spacing: -0.065em;
 }
 
 .ifa-page-header p:not(.eyebrow) {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .ifa-empty {
@@ -542,7 +545,7 @@ button.behaviour:hover {
 
 .ifa-empty h2 {
   margin: 0;
-  font-size: clamp(30px, 5vw, 50px);
+  font-size: 12px;
   letter-spacing: -0.055em;
 }
 
@@ -693,7 +696,7 @@ button.behaviour:hover {
 
 .ifa-metric b {
   display: block;
-  font-size: 28px;
+  font-size: 12px;
   letter-spacing: -.045em;
 }
 
@@ -888,7 +891,7 @@ button.behaviour:hover {
 }
 
 .settings-header h1 {
-  font-size: clamp(38px, 6vw, 72px);
+  font-size: 12px;
   letter-spacing: -0.065em;
 }
 
@@ -953,7 +956,7 @@ button.behaviour:hover {
 
 .settings-page-title h2 {
   margin: 0;
-  font-size: clamp(30px, 4vw, 48px);
+  font-size: 12px;
   letter-spacing: -0.055em;
 }
 
@@ -975,7 +978,7 @@ button.behaviour:hover {
 
 .settings-card h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 12px;
 }
 
 .settings-two-col {
@@ -1042,7 +1045,7 @@ button.behaviour:hover {
   border-radius: 24px;
   color: white;
   background: linear-gradient(135deg, var(--purple), var(--purple-2));
-  font-size: 22px;
+  font-size: 12px;
   font-weight: 950;
 }
 
@@ -1085,7 +1088,7 @@ button.behaviour:hover {
 
 .share-preview strong,
 .plan-card strong {
-  font-size: 24px;
+  font-size: 12px;
   letter-spacing: -.04em;
 }
 
@@ -1294,13 +1297,13 @@ button.behaviour:hover {
 }
 
 .usage-hero strong {
-  font-size: 48px;
+  font-size: 12px;
   line-height: 1;
   letter-spacing: -.06em;
 }
 
 .usage-hero.compact strong {
-  font-size: 28px;
+  font-size: 12px;
 }
 
 .settings-table .table-wrap {
@@ -1382,7 +1385,7 @@ button.behaviour:hover {
 }
 
 .qr-placeholder span {
-  font-size: 36px;
+  font-size: 12px;
   font-weight: 950;
 }
 
@@ -1477,7 +1480,7 @@ button.behaviour:hover {
 
 .settings-group-head b {
   color: inherit;
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1;
 }
 
@@ -1577,12 +1580,12 @@ button.behaviour:hover {
 }
 .public-copy h1 {
   max-width: 760px;
-  font-size: clamp(48px, 8vw, 94px);
+  font-size: 12px;
 }
 .public-copy .lede {
   max-width: 670px;
   color: var(--muted);
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: 12px;
 }
 .anchor-button {
   display: inline-flex;
@@ -1690,7 +1693,7 @@ button.behaviour:hover {
 }
 .section-heading h2,
 .access-section h2 {
-  font-size: clamp(34px, 5vw, 62px);
+  font-size: 12px;
 }
 .two-panel,
 .capability-grid,
@@ -1788,7 +1791,7 @@ button.behaviour:hover {
 }
 .account-card h1,
 .onboarding-card h1 {
-  font-size: clamp(38px, 6vw, 64px);
+  font-size: 12px;
 }
 .auth-button {
   display: flex;
@@ -1816,7 +1819,7 @@ button.behaviour:hover {
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
 }
 .login-links {
   display: flex;
@@ -1901,7 +1904,7 @@ button.behaviour:hover {
     grid-template-columns: 1fr;
   }
   .public-copy h1 {
-    font-size: 44px;
+    font-size: 12px;
   }
 }
 

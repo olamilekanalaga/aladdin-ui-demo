@@ -1,4 +1,4 @@
-﻿export type Checkpoint = "BUY_10" | "BUY_25" | "BUY_50" | "BUY_100";
+export type Checkpoint = "BUY_10" | "BUY_25" | "BUY_50" | "BUY_100";
 export type Lifecycle = "new_launch" | "pre_migration" | "migrated";
 export type Confidence = "verified" | "partial" | "demo_only" | "unavailable";
 export type RetentionStatus = "holding" | "partial_exit" | "full_exit" | "accumulated" | "unknown";
