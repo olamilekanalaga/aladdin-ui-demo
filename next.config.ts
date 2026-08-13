@@ -1,9 +1,4 @@
 import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
-
+import path from "node:path";
+const nextConfig: NextConfig = { outputFileTracingRoot: path.resolve(process.cwd()) };
 export default nextConfig;

@@ -1,28 +1,25 @@
 {
-  "name": "aladdin",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "demo": "next dev -H 127.0.0.1 -p 5174",
-    "demo:tailscale": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/start-tailscale-demo.ps1",
-    "build": "next build",
-    "start": "next start",
-    "preview": "next start -H 127.0.0.1 -p 5174",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "lucide-react": "^0.460.0",
-    "next": "^15.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "^15.3.3",
-    "typescript": "^5"
-  }
+    "name":  "aladdin",
+    "version":  "1.0.0",
+    "private":  true,
+    "scripts":  {
+                    "dev":  "next dev",
+                    "build":  "next build",
+                    "start":  "next start",
+                    "lint":  "eslint"
+                },
+    "dependencies":  {
+                         "lucide-react":  "^0.460.0",
+                         "next":  "^15.3.3",
+                         "react":  "^19.0.0",
+                         "react-dom":  "^19.0.0"
+                     },
+    "devDependencies":  {
+                            "@types/node":  "^20",
+                            "@types/react":  "^19",
+                            "@types/react-dom":  "^19",
+                            "eslint":  "^9",
+                            "eslint-config-next":  "^15.3.3",
+                            "typescript":  "^5"
+                        }
 }
