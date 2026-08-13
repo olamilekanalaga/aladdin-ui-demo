@@ -9,9 +9,10 @@ const tabs=["Trades","Participants","Most Profitable","Largest Holders","First 1
 type Tab=(typeof tabs)[number];
 const descriptions:Record<Tab,string>={Trades:"Wallet context and position state for live transactions.",Participants:"Active participant cohorts and their current positioning.","Most Profitable":"Realised and unrealised performance behind the strongest wallets.","Largest Holders":"Largest observed balances and concentration risk.","First 100":"Early-buyer retention and position changes.",Holders:"Current holder distribution and behavioural state.","Live State":"What changed recently that matters to the trade.","Historical Match":"Similar observed formations and their subsequent outcomes."};
 
-export function TerminalInvestigation({token}:{token:Token}){
-  const [active,setActive]=useState<Tab>("Trades");
-  return <div className="investigate"><div className="tabs" role="tablist" aria-label="Terminal evidence views">{tabs.map(tab=><button type="button" role="tab" aria-selected={active===tab} className={active===tab?"active":""} onClick={()=>setActive(tab)} key={tab}>{tab}</button>)}</div><div className="tableHeading"><div><h2>{active}</h2><p>{descriptions[active]}</p></div><Link href={`/ask-ifa?context=token:${token.id}&label=${encodeURIComponent(`$${token.symbol}`)}`}>Ask IF{"\u00c1"} about ${token.symbol} {"\u2192"}</Link></div><EvidencePanel tab={active} token={token}/></div>
+export function TerminalInvestigation({token,initialView="Trades"}:{token:Token;initialView?:string}){
+  const validInitial=tabs.includes(initialView as Tab)?initialView as Tab:"Trades";
+  const [active,setActive]=useState<Tab>(validInitial);
+  return <div className="investigate"><div className="tabs" role="tablist" aria-label="Terminal evidence views">{tabs.map(tab=><button type="button" role="tab" aria-selected={active===tab} className={active===tab?"active":""} onClick={()=>setActive(tab)} key={tab}>{tab}</button>)}</div><div className="tableHeading"><div><h2>{active}</h2><p>{descriptions[active]}</p></div><Link href={`/ask-aladdin?context=token:${token.id}&label=${encodeURIComponent(`$${token.symbol}`)}`}>Ask Aladdin about ${token.symbol} {"\u2192"}</Link></div><EvidencePanel tab={active} token={token}/></div>
 }
 
 function EvidencePanel({tab,token}:{tab:Tab;token:Token}){

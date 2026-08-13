@@ -8,7 +8,7 @@ import {AccountControl} from "@/app/components/account/AccountControl";
 function contextLabel(path:string){
   if(path.startsWith("/live/"))return `$${path.split("/")[2]?.toUpperCase()||"TOKEN"} Terminal`;
   if(path.startsWith("/narratives"))return "Narratives";
-  if(path.startsWith("/ask-ifa"))return "Ask IF\u00c1";
+  if(path.startsWith("/ask-aladdin"))return "Ask Aladdin";
   if(path.startsWith("/alerts"))return "Alerts";
   return "Aladdin";
 }

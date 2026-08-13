@@ -6,7 +6,7 @@ Canonical Next.js frontend for Aladdin's behaviour-first crypto trading intellig
 
 - **Search** resolves tokens, wallets, transactions and natural-language questions into immediate intelligence.
 - **Terminal** provides structured token evidence and behavioural investigation.
-- **Ask IFÁ** supports contextual reasoning, comparison and historical evidence.
+- **Ask Aladdin** supports contextual reasoning, comparison and historical evidence.
 
 ## Development
 
