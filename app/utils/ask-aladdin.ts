@@ -1,4 +1,4 @@
-import type {AnswerMode,AskAladdinAnswer,EvidenceSnapshot,QuerySession,ResolvedAnalysisPeriod} from "@/app/types/ask-aladdin";
+import type {AnswerMode,LegacyAskAladdinAnswer,EvidenceSnapshot,QuerySession,ResolvedAnalysisPeriod} from "@/app/types/ask-aladdin";
 
 const londonFormatter=(date:Date,timezone:string)=>new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:timezone,timeZoneName:"short"}).format(date);
 export function resolveAnalysisPeriod(query:string,now:Date,lastActive:Date,lastChecked:Date,timezone="Europe/London"):ResolvedAnalysisPeriod{
@@ -12,7 +12,7 @@ export function resolveAnalysisPeriod(query:string,now:Date,lastActive:Date,last
 
 const e=(snapshot:EvidenceSnapshot,id:string)=>snapshot.evidence.find(item=>item.id===id)!;
 const claim=(snapshot:EvidenceSnapshot,id:string,title:string,body?:string)=>({id:`claim-${id}`,kind:e(snapshot,id).kind,title,body:body||e(snapshot,id).detail,evidenceIds:[id],terminalView:e(snapshot,id).terminalView});
-export function buildRoleAnswer(mode:AnswerMode,snapshot:EvidenceSnapshot,question:string):AskAladdinAnswer{
+export function buildRoleAnswer(mode:AnswerMode,snapshot:EvidenceSnapshot,question:string):LegacyAskAladdinAnswer{
  const briefing=/woke up|today|while i was away|overnight/i.test(question);
  const commonLimitations=[e(snapshot,"bundle").limitations!,e(snapshot,"coordinated-flow").limitations!,e(snapshot,"historical").limitations!,"Synthetic observations demonstrate product behaviour and are not live market evidence."];
  const base={mode,evidenceSnapshotId:snapshot.id,evidenceHash:snapshot.hash,limitations:commonLimitations};

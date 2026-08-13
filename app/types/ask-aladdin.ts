@@ -14,7 +14,12 @@ export interface EvidenceSnapshot{id:string;hash:string;tokenId:string;tokenSymb
 export interface ResolvedAnalysisPeriod{start:string;end:string;timezone:string;label:string;resolution:"today"|"since_last_active"|"since_last_checked"|"current_snapshot"}
 export interface QuerySession{id:string;title:string;primaryProfile:AnswerMode;answerMode:AnswerMode;entityId:string;entityLabel:string;analysisPeriod:ResolvedAnalysisPeriod|null;questions:string[];createdAt:string;updatedAt:string}
 export interface AnswerClaim{id:string;kind:EvidenceKind;title:string;body:string;evidenceIds:string[];terminalView?:string}
-export interface AskAladdinAnswer{mode:AnswerMode;headline:string;summary:string;sections:{title:string;claims:AnswerClaim[]}[];limitations:string[];followUps:string[];evidenceSnapshotId:string;evidenceHash:string}
+export interface LegacyAskAladdinAnswer{mode:AnswerMode;headline:string;summary:string;sections:{title:string;claims:AnswerClaim[]}[];limitations:string[];followUps:string[];evidenceSnapshotId:string;evidenceHash:string}
+export type ResultCellKind="text"|"number"|"usd"|"money"|"percent"|"token"|"side"|"wallet"|"tokenLink"|"contract";
+export interface ResultColumn{key:string;label:string;kind:ResultCellKind}
+export type AskRowValue=string|number|null;
+export interface AskResultRow{id:string;entityType:"token"|"wallet"|"transaction"|"cohort";tokenId?:string;walletId?:string;transactionId?:string;behaviourObservationId?:string;sourceInvestigationId?:string;terminalView?:string;values:Record<string,AskRowValue>}
+export interface AskAladdinAnswer{mode:AnswerMode;direct_answer:string;query_definition:string;result_columns:ResultColumn[];result_rows:AskResultRow[];result_count:number;displayed_count:number;sort_definition:string;active_filters:string[];analysis_period:ResolvedAnalysisPeriod;currency_display:"SOL"|"USD"|null;profile_summary:string;generated_follow_ups:string[];full_query_link:string;export_options:("CSV"|"JSON")[];data_details:{evidenceSnapshotId:string;evidenceHash:string;coverage:string;limitations:string[]};availability:Availability;synthetic:true;evidenceSnapshotId:string;evidenceHash:string;headline?:string;summary?:string;sections?:{title:string;claims:AnswerClaim[]}[];limitations?:string[];followUps?:string[]}
 
 // Production-facing contracts. Phase 1 supplies deterministic local implementations.
 export interface UserProfileRepository{get():AuthenticatedUserProfile|null;save(profile:AuthenticatedUserProfile):void}
