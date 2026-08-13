@@ -2,6 +2,7 @@ import type {AnswerMode,AskAladdinAnswer,AskResultRow,ResultColumn,ResolvedAnaly
 
 export type QueryOperation="resolving"|"filtering"|"joining"|"calculating"|"ranking"|"formatting";
 export type ActivityStatus="active"|"complete"|"error";
+export type AskIntent="greeting"|"casual"|"data_query"|"definition"|"follow_up"|"ambiguous"|"unsupported";
 export interface QueryFilter{field:string;operator:string;value:string|number|boolean}
 export interface QuerySort{field:string;direction:"asc"|"desc"}
 export interface QueryPlan{kind:"wallets"|"tokens"|"comparison"|"briefing";entityType:string;entityId?:string;filters:QueryFilter[];columns:string[];sort?:QuerySort;limit?:number;analysisPeriod:ResolvedAnalysisPeriod}
@@ -9,5 +10,5 @@ export interface ActivityEvent{id:string;message:string;operation:QueryOperation
 export interface ResultDataset{columns:ResultColumn[];rows:AskResultRow[];totalRows:number;displayedRows:number;availability:"available"|"unavailable"}
 export interface InvestigationRunState{status:"idle"|"running"|"complete"|"error";events:ActivityEvent[];startedAt?:string;completedAt?:string;errorMessage?:string}
 
-export interface AnalysisRequest{question:string;mode:AnswerMode;period:ResolvedAnalysisPeriod}
-export interface AnalyticalRunResult{answer:AskAladdinAnswer;queryPlan:QueryPlan;dataset:ResultDataset;activityEvents:ActivityEvent[]}
+export interface AnalysisRequest{question:string;mode:AnswerMode;period:ResolvedAnalysisPeriod;hasPriorContext?:boolean}
+export interface AnalyticalRunResult{answer:AskAladdinAnswer;queryPlan:QueryPlan|null;dataset:ResultDataset;activityEvents:ActivityEvent[]}

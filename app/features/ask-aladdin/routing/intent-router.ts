@@ -1,0 +1,22 @@
+import type {AskIntent,AnalysisRequest} from "@/app/types/analytics/query";
+
+export interface IntentResolution{intent:AskIntent;reply?:string}
+
+const greeting=/^(hi|hello|hey|good\s+(morning|afternoon|evening))[!.?\s]*$/i;
+const casual=/^(how are you|how's it going|thanks|thank you|what can you do)[!.?\s]*$/i;
+const definition=/^(what|who)\s+(is|are|does)\b/i;
+const dataTerms=/\b(show|which|compare|top|holders?|wallets?|tokens?|bought|sold|holding|market|liquidity|volume|migration|today|yesterday|week|alert|insider|creator|first\s*100|BARK|FROG)\b/i;
+
+export function resolveAskIntent(request:AnalysisRequest):IntentResolution{
+ const question=request.question.trim();
+ if(greeting.test(question))return{intent:"greeting",reply:"Hi Ola. What would you like to investigate?"};
+ if(casual.test(question))return{intent:"casual",reply:"I’m ready. Ask me about a token, wallet or market change."};
+ if(definition.test(question)){
+  if(/migration specialist/i.test(question))return{intent:"definition",reply:"A Migration Specialist is a wallet whose observed trading repeatedly focuses on tokens approaching or completing migration. The label describes behaviour in the available records; it does not identify the owner or guarantee future performance."};
+  return{intent:"definition",reply:"Tell me the Aladdin term you want defined, and I’ll explain it in plain English."};
+ }
+ if(/^(buy|sell|hold|avoid)\b/i.test(question))return{intent:"unsupported",reply:"I can show the relevant market and wallet evidence, but I don’t issue trading verdicts. Which token or risk would you like to investigate?"};
+ if(dataTerms.test(question))return{intent:request.hasPriorContext&&!/\b(BARK|FROG|token|wallet|market|today|yesterday)\b/i.test(question)?"follow_up":"data_query"};
+ if(question.split(/\s+/).length<4)return{intent:"ambiguous",reply:"What token, wallet or market activity would you like me to investigate?"};
+ return{intent:"ambiguous",reply:"Could you name the token, wallet, period or market change you want to investigate?"};
+}
