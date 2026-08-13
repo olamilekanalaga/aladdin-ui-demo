@@ -1,8 +1,8 @@
 "use client";
-import type {Dashboard,ExportRecord,InvestigationSession,SavedQuery,ThemePreference} from "@/app/types/workspace";
+import type {Dashboard,ExportRecord,InvestigationSession,SavedQuery} from "@/app/types/workspace";
 import type {AnswerMode,LegacyAnswerMode,QuerySession} from "@/app/types/ask-aladdin";
 import {normaliseAnswerMode} from "@/app/services/ask-aladdin-local";
-const SESSIONS="aladdin-ask-sessions",QUERIES="aladdin-saved-queries",DASHBOARDS="aladdin-dashboards",EXPORTS="aladdin-exports",ACTIVE="aladdin-active-investigation",THEME="aladdin-theme";
+const SESSIONS="aladdin-ask-sessions",QUERIES="aladdin-saved-queries",DASHBOARDS="aladdin-dashboards",EXPORTS="aladdin-exports",ACTIVE="aladdin-active-investigation";
 const read=<T>(key:string,fallback:T):T=>{try{const value=localStorage.getItem(key);return value?JSON.parse(value):fallback}catch{return fallback}};
 const write=(key:string,value:unknown)=>localStorage.setItem(key,JSON.stringify(value));
 export function normaliseInvestigation(value:Partial<InvestigationSession>&Partial<QuerySession>&{primaryProfile?:LegacyAnswerMode;answerMode?:LegacyAnswerMode}):InvestigationSession{return{id:value.id||`session-${Date.now()}`,title:value.title||"Untitled investigation",primaryProfile:normaliseAnswerMode(value.primaryProfile),answerMode:normaliseAnswerMode(value.answerMode),entityId:value.entityId||"",entityLabel:value.entityLabel||"No entity selected",entityType:value.entityType||((value.entityId||"")?"token":"none"),analysisPeriod:value.analysisPeriod||null,questions:Array.isArray(value.questions)?value.questions:[],turns:Array.isArray(value.turns)?value.turns:[],generatedNextQuestions:Array.isArray(value.generatedNextQuestions)?value.generatedNextQuestions:[],savedQueryIds:Array.isArray(value.savedQueryIds)?value.savedQueryIds:[],dashboardIds:Array.isArray(value.dashboardIds)?value.dashboardIds:[],exportIds:Array.isArray(value.exportIds)?value.exportIds:[],pinned:Boolean(value.pinned),status:value.status==="archived"?"archived":"active",createdAt:value.createdAt||new Date().toISOString(),updatedAt:value.updatedAt||new Date().toISOString()};}
@@ -14,6 +14,4 @@ export function getActiveInvestigation(sessionId?:string|null){const items=loadI
 export const loadQueries=()=>read<SavedQuery[]>(QUERIES,[]);export function saveQuery(query:SavedQuery){write(QUERIES,[query,...loadQueries().filter(item=>item.id!==query.id)]);return query}
 export const loadDashboards=()=>read<Dashboard[]>(DASHBOARDS,[]);export function saveDashboard(item:Dashboard){write(DASHBOARDS,[item,...loadDashboards().filter(existing=>existing.id!==item.id)]);return item}
 export const loadExports=()=>read<ExportRecord[]>(EXPORTS,[]);export function saveExport(item:ExportRecord){write(EXPORTS,[item,...loadExports().filter(existing=>existing.id!==item.id)]);return item}
-export function loadTheme():ThemePreference{const value=localStorage.getItem(THEME);return value==="light"||value==="system"?value:"dark"}
-export function applyTheme(value:ThemePreference){localStorage.setItem(THEME,value);document.documentElement.dataset.theme=value;return value}
 export function createBlankInvestigation(primaryProfile:AnswerMode,answerMode:AnswerMode):InvestigationSession{const now=new Date().toISOString();return normaliseInvestigation({id:`session-${Date.now()}`,title:"Untitled investigation",primaryProfile,answerMode,entityType:"none",createdAt:now,updatedAt:now})}

@@ -1,4 +1,5 @@
-import "./globals.css";import "./ask-aladdin.css";import "./workspace.css";import {AppShell} from "@/app/components/layout/AppShell";
+import "./globals.css";import "./ask-aladdin.css";import "./workspace.css";import "./theme.css";import {AppShell} from "@/app/components/layout/AppShell";import {ThemeProvider} from "@/app/components/theme/ThemeProvider";
 export const metadata={title:"Aladdin Intelligence",description:"Behaviour-first trading intelligence terminal"};
 export const viewport={width:"device-width",initialScale:1,maximumScale:1,viewportFit:"cover",themeColor:"#07070a"};
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><AppShell>{children}</AppShell></body></html>}
+const themeBoot=`(()=>{try{const key="aladdin-theme",stored=localStorage.getItem(key),preference=stored==="dark"||stored==="light"||stored==="system"?stored:"system",resolved=preference==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):preference,root=document.documentElement;root.dataset.theme=preference;root.dataset.resolvedTheme=resolved;root.style.colorScheme=resolved}catch{}})()`;
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en" data-theme="system" data-resolved-theme="dark" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{__html:themeBoot}}/></head><body><ThemeProvider><AppShell>{children}</AppShell></ThemeProvider></body></html>}
