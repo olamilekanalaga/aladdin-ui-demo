@@ -1,0 +1,4 @@
+export const DEVNET_LABEL="Solana Devnet";
+export function shortenWalletAddress(address:string,head=4,tail=4){return address.length<=head+tail+1?address:address.slice(0,head)+"..."+address.slice(-tail)}
+export function formatSolBalance(balance:number|null){return balance===null?"Balance unavailable":balance.toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:4})+" SOL"}
+export function walletErrorMessage(error:unknown){const message=error instanceof Error?error.message:String(error||"");if(/reject|cancel/i.test(message))return "Connection cancelled. Your wallet was not connected.";if(/not found|not installed|unavailable/i.test(message))return "This wallet is unavailable in the current browser.";if(/network|rpc|fetch/i.test(message))return "The Solana Devnet connection is currently unavailable.";return message||"The wallet could not be connected."}

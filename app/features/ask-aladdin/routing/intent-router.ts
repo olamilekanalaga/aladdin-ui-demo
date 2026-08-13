@@ -1,4 +1,5 @@
 import type {AskIntent,AnalysisRequest} from "@/app/types/analytics/query";
+import {tokenByExactMint} from "@/app/data/synthetic/ask-aladdin/token-consultations";
 
 export interface IntentResolution{intent:AskIntent;reply?:string}
 
@@ -9,8 +10,10 @@ const dataTerms=/\b(show|which|compare|top|holders?|wallets?|tokens?|bought|sold
 
 export function resolveAskIntent(request:AnalysisRequest):IntentResolution{
  const question=request.question.trim();
+ if(tokenByExactMint(question))return{intent:"data_query"};
  if(greeting.test(question))return{intent:"greeting",reply:"Hi Ola. What would you like to investigate?"};
  if(casual.test(question))return{intent:"casual",reply:"I’m ready. Ask me about a token, wallet or market change."};
+ if(request.hasPriorContext&&/^(who|when|are|how|what changed)\b/i.test(question))return{intent:"follow_up"};
  if(definition.test(question)){
   if(/migration specialist/i.test(question))return{intent:"definition",reply:"A Migration Specialist is a wallet whose observed trading repeatedly focuses on tokens approaching or completing migration. The label describes behaviour in the available records; it does not identify the owner or guarantee future performance."};
   return{intent:"definition",reply:"Tell me the Aladdin term you want defined, and I’ll explain it in plain English."};

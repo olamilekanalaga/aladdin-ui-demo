@@ -20,6 +20,6 @@ export async function runAskAladdinAnalysis(request:AnalysisRequest,onActivity:A
  await operate("filtering","Translating request into a data query",()=>{dataset=executeSyntheticQuery(plan)});
  await operate("calculating","Engineering required features",()=>{dataset={...dataset,rows:dataset.rows.map(row=>({...row,values:{...row.values}}))}});
  await operate("ranking",plan.kind==="wallets"?"Analysing wallet behaviour":"Analysing matching market records",()=>{dataset={...dataset,rows:[...dataset.rows]}});
- await operate("formatting","Preparing the final table",()=>{profileSummary=interpretDataset(request.mode,plan,dataset);answer=formatAnalyticalAnswer(request.question,request.mode,plan,dataset,profileSummary,generateFollowUps(request.question))});
+ await operate("formatting","Preparing the final table",()=>{profileSummary=interpretDataset(request.mode,plan,dataset);answer=formatAnalyticalAnswer(request.question,request.mode,plan,dataset,profileSummary,generateFollowUps(request.question,plan.entityId||request.currentEntityId),request.currentEntityId)});
  answer.intent=resolved.intent;answer.has_data=true;return{answer,queryPlan:plan,dataset,activityEvents:events};
 }

@@ -3,7 +3,7 @@ import {barkFrogComparison,barkMigrationSpecialists,comparisonColumns,tokenColum
 
 export function executeSyntheticQuery(plan:QueryPlan):ResultDataset{
  const unavailable=plan.filters.some(filter=>filter.field==="marketCap"&&Number(filter.value)>=1_000_000);
- const rows=unavailable?[]:plan.kind==="wallets"?barkMigrationSpecialists:plan.kind==="comparison"?barkFrogComparison:tokenResultRows;
+ const rows=unavailable?[]:plan.kind==="consultation"?tokenResultRows.filter(row=>row.tokenId===plan.entityId):plan.kind==="wallets"?(plan.entityId==="bark"?barkMigrationSpecialists:[]):plan.kind==="comparison"?barkFrogComparison:tokenResultRows;
  const columns=plan.kind==="wallets"?walletColumns:plan.kind==="comparison"?comparisonColumns:tokenColumns;
  const displayedRows=Math.min(rows.length,plan.limit||10);
  return{columns,rows,totalRows:rows.length,displayedRows,availability:rows.length?"available":"unavailable"};

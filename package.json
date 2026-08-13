@@ -7,9 +7,12 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "test": "node --test tests/ask-aladdin.test.mjs tests/workspace.test.mjs tests/theme.test.mjs tests/table-first.test.mjs tests/mobile-workspace-activity.test.mjs tests/latest-corrections.test.mjs"
+        "test": "node --test tests/ask-aladdin.test.mjs tests/workspace.test.mjs tests/theme.test.mjs tests/table-first.test.mjs tests/mobile-workspace-activity.test.mjs tests/latest-corrections.test.mjs tests/adaptive-ask-aladdin.test.mjs tests/launches-refinement.test.mjs tests/wallet-connect.test.mjs"
     },
     "dependencies": {
+        "@solana/wallet-adapter-base": "^0.9.27",
+        "@solana/wallet-adapter-react": "^0.15.39",
+        "@solana/web3.js": "^1.98.4",
         "lucide-react": "^0.460.0",
         "next": "^15.3.3",
         "react": "^19.0.0",
