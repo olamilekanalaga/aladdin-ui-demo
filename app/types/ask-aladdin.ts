@@ -1,5 +1,6 @@
-export const answerModes=["Trader","Analyst","Researcher","Token Creator"] as const;
+export const answerModes=["Trader","Analyst","Token Creator"] as const;
 export type AnswerMode=(typeof answerModes)[number];
+export type LegacyAnswerMode=AnswerMode|"Researcher";
 export type Availability="available"|"unknown"|"unavailable"|"not_observed";
 export type EvidenceKind="fact"|"calculated_metric"|"behaviour_observation"|"historical_comparison"|"inference"|"uncertainty"|"missing_evidence";
 
