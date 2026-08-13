@@ -2,7 +2,7 @@
 import Link from "next/link";
 import {useMemo,useState} from "react";
 import {Copy} from "lucide-react";
-import {SOL_USD} from "@/app/data/ask-query";
+import {SOL_USD} from "@/app/data/synthetic/ask-aladdin/query-fixtures";
 import type {AskResultRow,ResultColumn} from "@/app/types/ask-aladdin";
 
 const tokenAmount=(value:unknown)=>typeof value==="number"?`${value.toLocaleString()} BARK`:"Unavailable";

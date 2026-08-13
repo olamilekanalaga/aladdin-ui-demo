@@ -1,0 +1,9 @@
+import type {AnswerMode,AskAladdinAnswer} from "@/app/types/ask-aladdin";
+import type {QueryPlan,ResultDataset} from "@/app/types/analytics/query";
+import {askAladdinSnapshot,briefingEvents} from "@/app/data/ask-aladdin";
+
+export function formatAnalyticalAnswer(question:string,mode:AnswerMode,plan:QueryPlan,dataset:ResultDataset,profileSummary:string,followUps:string[]):AskAladdinAnswer{
+ const direct=!dataset.totalRows?"No synthetic records match the resolved filters.":plan.kind==="wallets"?"5 of 6 Migration Specialists are still holding BARK.":plan.kind==="comparison"?"BARK retained more early buyers and experienced a smaller liquidity decline after migration.":plan.kind==="briefing"?`${briefingEvents.length} material synthetic market changes were identified in the analysed period.`:`${dataset.totalRows} structured records match this query.`;
+ const activeFilters=plan.filters.map(filter=>`${filter.field} ${filter.operator} ${filter.value}`);
+ return{mode,direct_answer:direct,query_definition:question,result_columns:dataset.columns,result_rows:dataset.rows,result_count:dataset.totalRows,displayed_count:dataset.displayedRows,sort_definition:plan.sort?`${plan.sort.field}, ${plan.sort.direction}`:"Decision relevance",active_filters:activeFilters,analysis_period:plan.analysisPeriod,currency_display:plan.kind==="wallets"?"SOL":null,profile_summary:profileSummary,generated_follow_ups:followUps,full_query_link:"/queries",export_options:["CSV","JSON"],data_details:{evidenceSnapshotId:askAladdinSnapshot.id,evidenceHash:askAladdinSnapshot.hash,coverage:dataset.totalRows?"Synthetic fixture coverage":"No eligible rows",limitations:dataset.totalRows?["Synthetic demo data only. Correlation does not establish causation."]:["Widen the filter or remove a condition."]},availability:dataset.availability,synthetic:true,evidenceSnapshotId:askAladdinSnapshot.id,evidenceHash:askAladdinSnapshot.hash};
+}
