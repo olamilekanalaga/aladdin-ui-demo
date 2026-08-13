@@ -16,7 +16,7 @@ export function LaunchTokenCard({token,onBuy}:{token:LaunchToken;onBuy:(token:La
     <div className="launchMarketGrid">
       <Metric label="MC" value={moneyCompact(token.marketCap)}/>
       <Metric label="LIQ" value={moneyCompact(token.liquidity)}/>
-      <div className="launchMetric"><small>VOL</small><b>{moneyCompact(token.volume)} <span>· {volumeWindow(token)}</span>{change!==null&&<em className={change>=0?"volumeUp":"volumeDown"}>{change>=0?"↑":"↓"}{Math.abs(change)}%</em>}</b></div>
+      <div className="launchMetric"><small>VOL</small><b>{moneyCompact(token.volume)} <span>· {volumeWindow(token)}</span>{change!==null&&<em className={change>=0?"volumeUp":"volumeDown"}>{change>=0?"â†‘":"â†“"}{Math.abs(change)}%</em>}</b></div>
     </div>
     {token.lifecycle!=="migrated"&&token.bondingProgress!==null?<div className="launchLifecycle"><span><b>Bonding</b>{token.bondingProgress}%</span><div><i style={{width:`${token.bondingProgress}%`}}/></div></div>:<div className="launchPostMigration"><span>Holders <b>{token.holders===null?"Unavailable":countCompact(token.holders)}</b></span><span>TX <b>{token.transactions===null?"Unavailable":countCompact(token.transactions)}</b></span></div>}
     <div className="launchBehaviours" aria-label="Participant composition">
@@ -27,7 +27,7 @@ export function LaunchTokenCard({token,onBuy}:{token:LaunchToken;onBuy:(token:La
     </div>
     <footer className="launchCardActions">
       <button type="button" onClick={()=>onBuy(token)}><Bolt size={13}/>Buy</button>
-      <Link href={`/ask-aladdin?token=${encodeURIComponent(token.id)}&mint=${encodeURIComponent(token.mint)}`}><Sparkles size={13}/>Ask Aladdin</Link>
+      <Link href={`/ask-aladdin?context=token:${encodeURIComponent(token.id)}&label=${encodeURIComponent(`$${token.symbol}`)}&mint=${encodeURIComponent(token.mint)}&autorun=token`}><Sparkles size={13}/>Ask Aladdin</Link>
     </footer>
   </article>
 }

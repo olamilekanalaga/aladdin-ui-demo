@@ -1,17 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useEffect} from "react";
-import {Activity,ChartNoAxesCombined,Eye,History,LayoutList,Settings,ShieldAlert,Sparkles,Users,X} from "lucide-react";
-
-const groups=[
-  {label:"MARKET",items:[["/movers","Movers + Why",ChartNoAxesCombined],["/og","Established / OG",LayoutList]]},
-  {label:"INTELLIGENCE",items:[["/formation","Market Formation",Activity],["/smart-money","Smart Money",Sparkles],["/insiders","Insider Activity",ShieldAlert],["/clusters","Coordinated Wallets",Users],["/historical","Historical",History]]},
-  {label:"TRADING",items:[["/watchlist","Watchlist",Eye]]},
-  {label:"ACCOUNT",items:[["/settings","Settings",Settings]]},
-] as const;
+import {BookOpen,Braces,Copy,Settings,X} from "lucide-react";
+const groups=[{label:"PRODUCT",items:[["/settings","Settings",Settings],["/copy-traders","Copy Smart Traders",Copy],["/api","API",Braces],["/docs","Docs",BookOpen]]}] as const;
 export const moreRoutes=groups.flatMap(group=>group.items.map(item=>item[0]));
-export function MobileMoreDrawer({open,path,onClose}:{open:boolean;path:string;onClose:()=>void}){
-  useEffect(()=>{if(!open)return;const close=(event:KeyboardEvent)=>{if(event.key==="Escape")onClose()};addEventListener("keydown",close);return()=>removeEventListener("keydown",close)},[open,onClose]);
-  if(!open)return null;
-  return <div className="mobileDrawerBackdrop" onMouseDown={event=>{if(event.target===event.currentTarget)onClose()}}><section className="mobileMoreDrawer" role="dialog" aria-modal="true" aria-label="More Aladdin destinations"><header><div><small>MOBILE NAVIGATION</small><b>More</b></div><button type="button" aria-label="Close navigation" onClick={onClose}><X/></button></header><nav>{groups.map(group=><div className="mobileDrawerGroup" key={group.label}><small>{group.label}</small>{group.items.map(([href,label,Icon])=>{const active=path===href||path.startsWith(`${href}/`);return <Link className={active?"active":""} href={href} onClick={onClose} key={href}><Icon/><span>{label}</span></Link>})}</div>)}</nav></section></div>
-}
+export function MobileMoreDrawer({open,path,onClose}:{open:boolean;path:string;onClose:()=>void}){useEffect(()=>{if(!open)return;const close=(event:KeyboardEvent)=>{if(event.key==="Escape")onClose()};addEventListener("keydown",close);return()=>removeEventListener("keydown",close)},[open,onClose]);if(!open)return null;const xUrl=process.env.NEXT_PUBLIC_ALADDIN_X_URL,telegramUrl=process.env.NEXT_PUBLIC_ALADDIN_TELEGRAM_URL;return <div className="mobileDrawerBackdrop" onMouseDown={event=>{if(event.target===event.currentTarget)onClose()}}><section className="mobileMoreDrawer compactMore" role="dialog" aria-modal="true" aria-label="More Aladdin destinations"><header><div><small>ALADDIN</small><b>More</b></div><button type="button" aria-label="Close navigation" onClick={onClose}><X/></button></header><nav>{groups.map(group=><div className="mobileDrawerGroup" key={group.label}>{group.items.map(([href,label,Icon])=>{const active=path===href||path.startsWith(`${href}/`);return <Link className={active?"active":""} href={href} onClick={onClose} key={href}><Icon/><span>{label}</span></Link>})}</div>)}</nav><footer className="moreSocials">{xUrl?<a href={xUrl} aria-label="Aladdin on X">X</a>:<button disabled title="X link is not configured">X</button>}{telegramUrl?<a href={telegramUrl} aria-label="Aladdin on Telegram">Telegram</a>:<button disabled title="Telegram link is not configured">Telegram</button>}</footer></section></div>}

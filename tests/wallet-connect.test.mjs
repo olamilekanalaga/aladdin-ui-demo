@@ -29,5 +29,5 @@ test("intelligence stays available while execution requests a wallet",()=>{
 test("visible product terminology is Ask Aladdin and What Changed",()=>{
   const terminal=read("app/components/ifa/IfaNow.tsx"),settings=read("app/settings/page.tsx");
   assert.match(terminal,/WHAT CHANGED/);assert.doesNotMatch(terminal,/IFÁ|IFA NOW|ALADDIN NOW/);
-  assert.match(settings,/Aladdin Intelligence/);assert.match(settings,/ASK ALADDIN API/);
+  const api=read("app/api/page.tsx");assert.match(settings,/Aladdin Intelligence/);assert.match(api,/ASK ALADDIN API/);
 });
