@@ -31,3 +31,17 @@ test("visible product terminology is Ask Aladdin and What Changed",()=>{
   assert.match(terminal,/WHAT CHANGED/);assert.doesNotMatch(terminal,/IFÁ|IFA NOW|ALADDIN NOW/);
   const api=read("app/api/page.tsx");assert.match(settings,/Aladdin Intelligence/);assert.match(api,/ASK ALADDIN API/);
 });
+
+test("Devnet transaction requires explicit wallet approval and self-transfers only",()=>{
+  const provider=read("app/providers/SolanaProvider.tsx"),modal=read("app/components/wallet-connect/DevnetTransactionModal.tsx");
+  assert.match(provider,/SystemProgram\.transfer/);assert.match(provider,/fromPubkey:publicKey,toPubkey:publicKey/);
+  assert.match(provider,/sendTransaction\(transaction,connection/);assert.match(provider,/confirmTransaction/);
+  assert.match(modal,/Approve test transaction/);assert.match(modal,/Devnet SOL has no monetary value/);
+  assert.match(modal,/explorer\.solana\.com\/tx/);assert.match(modal,/cluster=devnet/);
+});
+test("Devnet transaction state is honest and does not implement swaps or Mainnet",()=>{
+  const provider=read("app/providers/SolanaProvider.tsx"),modal=read("app/components/wallet-connect/DevnetTransactionModal.tsx"),types=read("app/types/wallet.ts");
+  for(const state of ["review","preparing","signing","confirming","confirmed","error"])assert.match(types,new RegExp(`"${state}"`));
+  assert.doesNotMatch(provider,/mainnet-beta|Jupiter|swap/);assert.doesNotMatch(modal,/Buy successful|Swap successful/);
+  assert.match(modal,/does not buy a token or enable Mainnet trading/);
+});
