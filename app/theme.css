@@ -46,7 +46,7 @@ button:disabled,[aria-disabled="true"]{background:var(--disabled-surface);color:
 .narrativeCard small,.narrativeTokenDrivers span small,.narrativeTokenDrivers>small,.settingSections h3,
 .helpGrid h3,.expandedSettings aside small,.investigationHistory section>small{color:var(--text-metadata)}
 .toolbar,.rowActions a,.rowActions button,.profileSettings input,.settingSections select,.themeChoices button,
-.accountMenu section button,.walletSettings>button,.workspaceDrawerButton,.tableControls input,.tableControls select,
+.accountMenu section button,.workspaceDrawerButton,.tableControls input,.tableControls select,
 .tableControls summary{background:var(--input-bg);border-color:var(--border);color:var(--text-secondary)}
 .toolbar>button:hover,.sidebar nav a:hover,.settings:hover,.helpGrid button:hover,.accountMenu nav a:hover,
 .accountMenu nav button:hover{background:var(--hover-surface);color:var(--text-primary)}
@@ -84,7 +84,6 @@ html[data-resolved-theme="light"] .publicLanding{background:var(--page-bg);color
 html[data-resolved-theme="light"] .landingNav{background:var(--nav-bg);border-color:var(--border)}
 html[data-resolved-theme="light"] .landingNav nav a,html[data-resolved-theme="light"] .heroCopy>p,
 html[data-resolved-theme="light"] .landingFooter{color:var(--text-secondary)}
-html[data-resolved-theme="light"] .connectOptions button{background:var(--surface);color:var(--text-primary);border-color:var(--border)}
 
 /* Deliberate branded/terminal-dark surfaces retain explicit inverse contrast in either theme. */
 .topbar,.ticker,.signalStrip,.decisionQuestion,.chartPanel,.ifaNow,.heroVisual{
