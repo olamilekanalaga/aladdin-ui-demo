@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 dist/
 .next/
 
@@ -16,3 +16,5 @@ ipconfig.txt
 # Operating-system metadata
 .DS_Store
 Thumbs.db
+.devnet-market-authority.json
+.vercel
